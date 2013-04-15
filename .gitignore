@@ -1,3 +1,5 @@
+COOKIE_SECRET
+
 *.py[cod]
 
 # C extensions
