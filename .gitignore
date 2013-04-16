@@ -1,4 +1,4 @@
-COOKIE_SECRET
+KEYS.py
 
 *.py[cod]
 
@@ -35,3 +35,6 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+#mac
+.DS_Store

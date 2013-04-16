@@ -5,32 +5,57 @@
 {% endblock %}
 
 {% block content %}
-  <form class="form-horizontal form-xsmall">
+  {% for flash in flashes %}
+    {% if flash[1] == 'success' %}
+      <div class="alert alert-success">
+    {% else %}
+      <div class="alert">
+    {% endif %}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      {{ flash[0] }}
+      </div>
+  {% endfor %}
+  <form class="form-horizontal form-small" method="post">
     <legend>내 프로필</legend>
     <div class="control-group">
-      <label class="control-label" for="inputName">이름</label>
+      <label class="control-label" for="input_nickname">닉네임</label>
       <div class="controls">
-        <input type="text" id="inputName" placeholder="">
+        <input class="input-large" type="text" 
+               id="input_nickname" name="nickname" value="{{ user.nickname or '' }}">
       </div>
     </div>
     <div class="control-group">
-      <label class="control-label" for="inputEmail">Email</label>
+      <label class="control-label" for="input_tag0">태그1</label>
       <div class="controls">
-        <input type="text" id="inputEmail" placeholder="Email">
+        <input class="input-large" type="text" 
+               id="input_tag0" name="tag0" value="{{ tags[0] or '' }}">
       </div>
     </div>
     <div class="control-group">
-      <label class="control-label" for="inputPassword">Password</label>
+      <label class="control-label" for="input_tag1">태그2</label>
       <div class="controls">
-        <input type="password" id="inputPassword" placeholder="Password">
+        <input class="input-large" type="text" 
+               id="input_tag1" name="tag1" value="{{ tags[1] or '' }}">
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label" for="input_tag2">태그3</label>
+      <div class="controls">
+        <input class="input-large" type="text" 
+               id="input_tag2" name="tag2" value="{{ tags[2] or '' }}">
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label" for="textarea_profile">자기소개</label>
+      <div class="controls">
+        <textarea rows="10" class="input-large" id="textarea_profile" 
+                  name="profile">{{ user.profile or '' }}</textarea>
       </div>
     </div>
     <div class="control-group">
       <div class="controls">
-        <label class="checkbox">
-          <input type="checkbox"> Remember me
-        </label>
-        <button type="submit" class="btn">Sign in</button>
+        <button type="submit" class="btn btn-primary" 
+                name="change_account" value="change_account">저장하기</button>
       </div>
     </div>
   </form>

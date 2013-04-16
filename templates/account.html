@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}
+    설정
+{% endblock %}
+
+{% block content %}
+  {% for flash in flashes %}
+    {% if flash[1] == 'success' %}
+      <div class="alert alert-success">
+    {% else %}
+      <div class="alert">
+    {% endif %}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      {{ flash[0] }}
+      </div>
+  {% endfor %}
+  <form class="form-horizontal form-small" method="post">
+    <legend>기본정보</legend>
+    <div class="control-group">
+      <label class="control-label" for="input_username">이메일</label>
+      <div class="controls">
+        <span class="uneditable-input" id="input_username">{{ user.username }}@snu.ac.kr</span>
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label" for="input_name">이름</label>
+      <div class="controls">
+        <input class="input-large" type="text" 
+               id="input_name" name="name" value="{{ user.name or '' }}">
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label" for="input_phone">전화번호</label>
+      <div class="controls">
+        <input class="input-large" type="text" 
+               id="input_phone" name="phone" value="{{ user.phone or '' }}">
+      </div>
+    </div>
+    <div class="control-group">
+      <div class="controls">
+        <button type="submit" class="btn" 
+                name="change_account" value="change_account">저장하기</button>
+      </div>
+    </div>
+  </form>
+  <form class="form-horizontal form-small" method="post">
+    <legend>비밀번호 변경</legend>
+    {% for error_key in password_errors %}
+      <div class="alert">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+          {{ password_errors[error_key] }}
+      </div>
+    {% endfor %}
+    <div class="control-group">
+      <label class="control-label" for="input_current_password">현재 비밀번호</label>
+      <div class="controls">
+        <input class="input-large" type="password" 
+               id="input_current_password" name="current_password">
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label" for="input_new_password">새 비밀번호</label>
+      <div class="controls">
+        <input class="input-large" type="password" id="input_new_password" name="new_password">
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label" for="input_verify_password">새 비밀번호 확인</label>
+      <div class="controls">
+        <input class="input-large" type="password" 
+               id="input_verify_password" name="verify_new_password">
+      </div>
+    </div>
+    <div class="control-group">
+      <div class="controls">
+        <button type="submit" class="btn" 
+                name="change_password" value="change_password">저장하기</button>
+      </div>
+    </div>
+  </form>
+{% endblock %}

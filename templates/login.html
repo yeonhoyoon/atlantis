@@ -8,6 +8,12 @@
 {% endblock %}
 
 {% block content %}
+{% if login_error %}
+<div class="alert alert-error">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  아이디 또는 비밀번호를 다시 확인해 주세요.
+</div>
+{% endif %}
 <form class="form-horizontal" method="post">
   <legend>로그인</legend>
   <div class="control-group">

@@ -4,12 +4,13 @@ import re
 import webapp2
 import jinja2
 from google.appengine.ext import db
+from webapp2_extras import sessions
 import util
-
+import keys
 
 jinja_env = jinja2.Environment(autoescape = True,
                                loader = jinja2.FileSystemLoader(
-                                os.path.join(os.path.dirname(__file__), 'templates')))
+                               os.path.join(os.path.dirname(__file__), 'templates')))
 
 
 class User(db.Model):
@@ -25,6 +26,7 @@ class User(db.Model):
     contact_allowed_gender = db.CategoryProperty(choices=set(['M', 'F', 'MF']))
     birth_year = db.IntegerProperty()
     region = db.CategoryProperty()
+    nickname = db.StringProperty()
     tags = db.StringProperty()
     profile = db.TextProperty()
     
@@ -45,6 +47,16 @@ class User(db.Model):
         user = cls.by_username(name)
         if user and util.check_password(password, user.password):
             return user
+
+    def get_tags(self):
+        if self.tags:
+            return self.tags.split('|')
+        else: 
+            return ['', '', '']
+
+    def set_tags(self, tags):
+        if tags:
+            self.tags = '|'.join(map(lambda tag: tag.replace('|', ''), tags))
 
 
 class Proposal(db.Model):
@@ -89,13 +101,31 @@ class BaseHandler(webapp2.RequestHandler):
         uid = self.read_secure_cookie('user_id')
         self.user = uid and User.get_by_id(int(uid))
 
+    def dispatch(self):
+        self.session_store = sessions.get_store(request=self.request)        
+        try:
+            webapp2.RequestHandler.dispatch(self)
+        finally:
+            self.session_store.save_sessions(self.response)
+
+    @webapp2.cached_property
+    def session(self):
+        return self.session_store.get_session()
+
+    def current_uri(self):
+        return self.uri_for(self.__class__.__name__)
+
+    def save_user_and_redirect(self):
+        self.user.put()
+        self.session.add_flash(u'변경 사항을 저장하였습니다.', level='success')
+        self.redirect(self.current_uri())
+
 
 class LoginRequiredPage(BaseHandler):
     def initialize(self, *a, **kw):
         BaseHandler.initialize(self, *a, **kw)
         if not self.user:
-            uri = self.uri_for(self.__class__.__name__)
-            self.redirect('/login?returnurl=' + uri)
+            self.redirect('/login?returnurl=' + self.current_uri())
 
 
 class MeetPage(LoginRequiredPage):
@@ -111,7 +141,54 @@ class TalkPage(LoginRequiredPage):
 
 class ProfilePage(LoginRequiredPage):
     def get(self):
-        self.render('profile.html', user=self.user)
+        flashes = self.session.get_flashes()        
+        self.render('profile.html', user=self.user, 
+                                    tags=self.user.get_tags(), 
+                                    flashes=flashes)
+
+    def post(self):
+        nickname = self.request.get('nickname')
+        tag0 = self.request.get('tag0')
+        tag1 = self.request.get('tag1')
+        tag2 = self.request.get('tag2')
+        profile = self.request.get('profile')
+
+        self.user.nickname = nickname
+        self.user.set_tags([tag0, tag1, tag2])
+        self.user.profile = profile
+
+        self.save_user_and_redirect()
+
+
+class AccountPage(LoginRequiredPage):
+    def get(self):
+        flashes = self.session.get_flashes()
+        self.render('account.html', user=self.user, flashes=flashes)
+
+    def post(self):
+        name = self.request.get('name')
+        phone = self.request.get('phone')
+        current_password = self.request.get('current_password')
+        new_password = self.request.get('new_password')
+        verify_new_password = self.request.get('verify_new_password')
+
+        if self.request.get('change_account'):
+            self.user.name = name
+            self.user.phone = phone
+            self.save_user_and_redirect()
+
+        elif self.request.get('change_password'):
+            password_errors = {}
+            if not util.check_password(current_password, self.user.password):
+                password_errors['current_password'] = u'현재 비밀번호가 맞지 않습니다.'
+            if new_password != verify_new_password:
+                password_errors['verify_password'] = u'비밀번호와 비밀번호 확인이 다릅니다.'
+
+            if not password_errors:
+                self.user.password = util.make_password_hash(new_password)
+                self.save_user_and_redirect()
+            else:
+                self.render('account.html', user=self.user, password_errors=password_errors)
 
 
 class MainPage(BaseHandler):
@@ -142,10 +219,13 @@ class MainPage(BaseHandler):
 
         duplicate_user = User.by_username(username)
         if duplicate_user:
-            errors['username_error'] = "Duplicate user exists."
+            errors['username_error'] = u"이미 등록된 사용자입니다."
+
+        if not password:
+            errors['password_error'] = u'비밀번호를 입력해 주세요.'
 
         if password != verify:
-            errors['verify_error'] = "Passwords don't match."
+            errors['verify_error'] = u"비밀번호와 비밀번호 확인이 다릅니다."
         
         return errors
 
@@ -168,7 +248,7 @@ class LoginPage(BaseHandler):
             else:
                 self.redirect('/')
         else:
-            self.render('login.html', login_error=u"사용자 이름과 비밀번호를 다시 한번 확인해 주세요.")
+            self.render('login.html', login_error=True)
 
 
 class LogoutPage(BaseHandler):
@@ -176,11 +256,17 @@ class LogoutPage(BaseHandler):
         self.logout()
         self.redirect('/')
 
+config = {}
+config['webapp2_extras.sessions'] = {
+    'secret_key': keys.SESSION_SECRET,
+}
 
 app = webapp2.WSGIApplication([('/', MainPage),
                                webapp2.Route('/meet', MeetPage, name='MeetPage'),
                                webapp2.Route('/talk', TalkPage, name='TalkPage'),
                                webapp2.Route('/profile', ProfilePage, name='ProfilePage'),
+                               webapp2.Route('/account', AccountPage, name='AccountPage'),
                                ('/login', LoginPage),
                                ('/logout', LogoutPage)],
+                               config = config,
                                debug=True)

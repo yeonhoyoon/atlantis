@@ -1,11 +1,12 @@
 import hmac
 from library.pybcrypt import bcrypt
+import keys
 
-COOKIE_SECRET = '401b09eab3c013d4ca54922bb802bec8' #move to another file.
 COOKIE_SEPARATOR = '|'
 
+
 def make_cookie_value(value):
-        hashed = hmac.new(COOKIE_SECRET, str(value)).hexdigest()
+        hashed = hmac.new(keys.COOKIE_SECRET, str(value)).hexdigest()
         return '{0}{1}{2}'.format(value, COOKIE_SEPARATOR, hashed)
 
 def check_cookie_value(cookie_value):
