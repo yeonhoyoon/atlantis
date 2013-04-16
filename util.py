@@ -1,5 +1,5 @@
 import hmac
-from lib.pybcrypt import bcrypt
+from library.pybcrypt import bcrypt
 
 COOKIE_SECRET = '401b09eab3c013d4ca54922bb802bec8' #move to another file.
 COOKIE_SEPARATOR = '|'

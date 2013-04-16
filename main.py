@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import re
 import webapp2
@@ -6,19 +7,17 @@ from google.appengine.ext import db
 import util
 
 
-PASSWORD_RE = re.compile(r"^.{4,100}$")
-
 jinja_env = jinja2.Environment(autoescape = True,
                                loader = jinja2.FileSystemLoader(
                                 os.path.join(os.path.dirname(__file__), 'templates')))
 
 
 class User(db.Model):
-    email = db.EmailProperty(required=True)
+    username = db.StringProperty(required=True)
     password = db.StringProperty(required=True)
     last_active = db.DateTimeProperty(required=True, auto_now_add=True)
     created = db.DateTimeProperty(required=True, auto_now_add=True)
-    email_confirmed = db.BooleanProperty(required=True, default=False)
+    confirmed = db.BooleanProperty(required=True, default=False)
 
     name = db.StringProperty()
     phone = db.PhoneNumberProperty()
@@ -37,9 +36,15 @@ class User(db.Model):
     is_active = db.BooleanProperty(required=True, default=True)
 
     @classmethod
-    def by_email(cls, email):
-        user = cls.all().filter('email =', email).get()
+    def by_username(cls, username):
+        user = cls.all().filter('username =', username).get()
         return user
+
+    @classmethod
+    def validate(cls, name, password):
+        user = cls.by_username(name)
+        if user and util.check_password(password, user.password):
+            return user
 
 
 class Proposal(db.Model):
@@ -85,55 +90,97 @@ class BaseHandler(webapp2.RequestHandler):
         self.user = uid and User.get_by_id(int(uid))
 
 
-class MainPage(BaseHandler):
-    def get(self):
-        self.render('main.html', title='main page')
+class LoginRequiredPage(BaseHandler):
+    def initialize(self, *a, **kw):
+        BaseHandler.initialize(self, *a, **kw)
+        if not self.user:
+            uri = self.uri_for(self.__class__.__name__)
+            self.redirect('/login?returnurl=' + uri)
 
 
-class DatesPage(BaseHandler):
+class MeetPage(LoginRequiredPage):
     def get(self):
         users = User.all().run()
-        self.render('dates.html', users=users)
+        self.render('meet.html', users=users, user=self.user)
 
 
-class SignupPage(BaseHandler):
+class TalkPage(LoginRequiredPage):
     def get(self):
-        self.render('signup.html')
+        self.render('talk.html', user=self.user)
+
+
+class ProfilePage(LoginRequiredPage):
+    def get(self):
+        self.render('profile.html', user=self.user)
+
+
+class MainPage(BaseHandler):
+    def get(self):
+        if self.user:
+            self.render('main.html', user=self.user)
+        else:
+            self.render('signup.html')
 
     def post(self):
-        email = self.request.get('email')
+        username = self.request.get('username')
         password = self.request.get('password')
         verify = self.request.get('verify')
-
-        errors = self.get_errors(email, password, verify)
+        errors = self.get_errors(username, password, verify)
 
         if errors:
-            self.render('signup.html', **dict({ 'email': email }.items() +
-                                              errors.items()))
+            self.render('signup.html', errors=errors)
         else:
             hashed = util.make_password_hash(password)
-            user = User(email=email, password=hashed)
+            user = User(username=username, password=hashed)
             user.put()
 
             self.login(user)
-            self.redirect('/dates')
+            self.redirect('/')
 
-    def get_errors(self, email, password, verify):
+    def get_errors(self, username, password, verify):
         errors = {}
 
-        duplicate_user = User.by_email(email)
+        duplicate_user = User.by_username(username)
         if duplicate_user:
-            errors['email_error'] = "Duplicate user exists."
+            errors['username_error'] = "Duplicate user exists."
 
-        if PASSWORD_RE.match(password) is None:
-            errors['password_error'] = "That's not a valid password."
         if password != verify:
             errors['verify_error'] = "Passwords don't match."
         
         return errors
 
 
+class LoginPage(BaseHandler):
+    def get(self):
+        self.render('/login.html')
+
+    def post(self):
+        username = self.request.get('username')
+        password = self.request.get('password')
+
+        user = User.validate(username, password)
+        if user:
+            self.login(user)
+
+            returnurl = self.request.get('returnurl')
+            if returnurl:
+                self.redirect(str(returnurl))
+            else:
+                self.redirect('/')
+        else:
+            self.render('login.html', login_error=u"사용자 이름과 비밀번호를 다시 한번 확인해 주세요.")
+
+
+class LogoutPage(BaseHandler):
+    def get(self):
+        self.logout()
+        self.redirect('/')
+
+
 app = webapp2.WSGIApplication([('/', MainPage),
-                               ('/dates', DatesPage),
-                               ('/signup', SignupPage)],
+                               webapp2.Route('/meet', MeetPage, name='MeetPage'),
+                               webapp2.Route('/talk', TalkPage, name='TalkPage'),
+                               webapp2.Route('/profile', ProfilePage, name='ProfilePage'),
+                               ('/login', LoginPage),
+                               ('/logout', LogoutPage)],
                                debug=True)

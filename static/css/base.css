@@ -1,0 +1,44 @@
+.form-xsmall .control-label {
+    width: 60px;
+}
+
+.form-xsmall .controls {
+    margin-left: 80px;
+}
+
+.form-small .control-label {
+    width: 100px;
+}
+
+.form-small .controls {
+    margin-left: 120px;
+}
+
+.form-medium .control-label {
+    width: 180px;
+}
+
+.form-medium .controls {
+    margin-left: 200px;
+}
+
+.form-xlarge .control-label {
+    width: 240px;
+}
+
+.form-xlarge .controls {
+    margin-left: 260px;
+}
+
+.navbar-form .input-append,
+.navbar-form .input-prepend {
+  margin-bottom: 0px;
+}
+
+.icon-gray {
+  opacity: 0.3;
+}
+
+.icon-gray:hover {
+	opacity: 1;
+}
