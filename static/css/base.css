@@ -27,10 +27,6 @@
   margin-bottom: 0px;
 }
 
-.icon-gray {
-  opacity: 0.3;
-}
-
-.icon-gray:hover {
-	opacity: 1;
+a.favorite:hover {
+	text-decoration: none;
 }

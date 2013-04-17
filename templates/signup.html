@@ -7,6 +7,12 @@
 {% block content %}
 <form class="form-horizontal pull-right" method="post">
   <legend>가입하기</legend>
+  {% for error_key in errors %}
+    <div class="alert">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+        {{ errors[error_key] }}
+    </div>
+  {% endfor %}
   <div class="control-group">
     <div class="input-append">
       <input class="span2" type="text" name="username" placeholder="이메일">

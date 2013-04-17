@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import re
+from datetime import datetime, timedelta
 import webapp2
 import jinja2
 from google.appengine.ext import db
@@ -16,7 +17,7 @@ jinja_env = jinja2.Environment(autoescape = True,
 class User(db.Model):
     username = db.StringProperty(required=True)
     password = db.StringProperty(required=True)
-    last_active = db.DateTimeProperty(required=True, auto_now_add=True)
+    last_active = db.DateTimeProperty(required=True, auto_now=True)
     created = db.DateTimeProperty(required=True, auto_now_add=True)
     confirmed = db.BooleanProperty(required=True, default=False)
 
@@ -130,8 +131,12 @@ class LoginRequiredPage(BaseHandler):
 
 class MeetPage(LoginRequiredPage):
     def get(self):
-        users = User.all().run()
-        self.render('meet.html', users=users, user=self.user)
+        q = User.all()
+        q.filter('last_active >', datetime.utcnow() - timedelta(days=3))
+        recent_users = q.run()
+        other_users = filter(lambda u: u.username != self.user.username, recent_users)
+
+        self.render('meet.html', other_users=other_users, user=self.user)
 
 
 class TalkPage(LoginRequiredPage):
@@ -256,6 +261,23 @@ class LogoutPage(BaseHandler):
         self.logout()
         self.redirect('/')
 
+
+class TestPage(BaseHandler):
+    def get(self):
+        hashed = util.make_password_hash('1234')
+
+        for i in range(40):
+            user = User(username='abc' + str(i),
+                        name=u'실명' + str(i),
+                        phone=u'01024235231',
+                        password=hashed, 
+                        nickname=u'사용자' + str(i),
+                        profile=u'사용자 {}의 나의 멋진 프로필'.format(i))
+            user.set_tags([u'놀이공원',u'멋진 사람',u'예뻐요'])
+            user.put()
+
+        self.write('success')
+
 config = {}
 config['webapp2_extras.sessions'] = {
     'secret_key': keys.SESSION_SECRET,
@@ -266,6 +288,7 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                webapp2.Route('/talk', TalkPage, name='TalkPage'),
                                webapp2.Route('/profile', ProfilePage, name='ProfilePage'),
                                webapp2.Route('/account', AccountPage, name='AccountPage'),
+                               ('/test123', TestPage),
                                ('/login', LoginPage),
                                ('/logout', LogoutPage)],
                                config = config,
