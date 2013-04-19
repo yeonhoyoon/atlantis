@@ -5,19 +5,40 @@
 {% endblock %}
 
 {% block content %}
-
-<div class="row-fluid">
-	<div class="span12">
-		<h3>남은 선택 : 3</h3>
-	</div>
+<div id="noRemainingChoicesAlert" class="alert alert-info hide">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <strong>3명</strong>까지 선택할 수 있습니다.
 </div>
-<ul class="thumbnails">
+<div id="remainingChoices" class="row-fluid">
+  <div class="span12">
+    <span class="h3">남은 선택 : <span class="number">3</span> </span>
+    <button id="selectComplete" 
+            class="btn btn-large btn-success pull-right" href="#">선택 완료</button>
+  </div>
+</div>
+<ul class="thumbnails" id="selectedUsers">
+	{% for i in range(3) %}
+	<li class="span4 unknownCard">
+    <div class="thumbnail">
+    	<div class="row-fluid text-center">
+  			<a class="no-deco" href="#">
+					<i class="icon-github-alt"></i>
+				</a>
+    	</div>
+    </div>
+  </li>
+	{% endfor %}
+</ul>
+<hr class="thick" style="margin-top:0px;">
+<ul class="thumbnails" id="userPool">
 {% for other_user in other_users %}
-  <li class="span4">
+  <li class="span4 userCard">
     <div class="thumbnail">
     	<div class="row-fluid">
 	    		<strong>{{ other_user.nickname }}</strong>
-    			<a class="favorite" href="#">
+          <input class="profile-uuid" 
+                 type="hidden" value="{{ other_user.profile_uuid }}" />
+    			<a class="select no-deco" href="#">
 						<i class="icon-star-empty icon-2x pull-right"></i></a>
     			</a>
     	</div>

@@ -2,6 +2,7 @@
 import os
 import re
 from datetime import datetime, timedelta
+import uuid
 import webapp2
 import jinja2
 from google.appengine.ext import db
@@ -30,6 +31,7 @@ class User(db.Model):
     nickname = db.StringProperty()
     tags = db.StringProperty()
     profile = db.TextProperty()
+    profile_uuid = db.StringProperty()
     
     remaining_choices = db.IntegerProperty(required=True, default=3)
     remaining_proposals = db.IntegerProperty(required=True, default=1)
@@ -161,6 +163,7 @@ class ProfilePage(LoginRequiredPage):
         self.user.nickname = nickname
         self.user.set_tags([tag0, tag1, tag2])
         self.user.profile = profile
+        self.user.profile_uuid = str(uuid.uuid1())
 
         self.save_user_and_redirect()
 
@@ -201,7 +204,7 @@ class MainPage(BaseHandler):
         if self.user:
             self.render('main.html', user=self.user)
         else:
-            self.render('signup.html')
+           self.render('signup.html')
 
     def post(self):
         username = self.request.get('username')
@@ -264,17 +267,23 @@ class LogoutPage(BaseHandler):
 
 class TestPage(BaseHandler):
     def get(self):
-        hashed = util.make_password_hash('1234')
+        users = User.all().run()
 
-        for i in range(40):
-            user = User(username='abc' + str(i),
-                        name=u'실명' + str(i),
-                        phone=u'01024235231',
-                        password=hashed, 
-                        nickname=u'사용자' + str(i),
-                        profile=u'사용자 {}의 나의 멋진 프로필'.format(i))
-            user.set_tags([u'놀이공원',u'멋진 사람',u'예뻐요'])
+        for user in users:
+            user.profile_uuid = str(uuid.uuid1())
             user.put()
+
+        # hashed = util.make_password_hash('1234')
+
+        # for i in range(40):
+        #     user = User(username='abc' + str(i),
+        #                 name=u'실명' + str(i),
+        #                 phone=u'01024235231',
+        #                 password=hashed, 
+        #                 nickname=u'사용자' + str(i),
+        #                 profile=u'사용자 {}의 나의 멋진 프로필'.format(i))
+        #     user.set_tags([u'놀이공원',u'멋진 사람',u'예뻐요'])
+        #     user.put()
 
         self.write('success')
 

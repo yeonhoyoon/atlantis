@@ -1,3 +1,12 @@
+body {
+  font-family: "Nanum Gothic", sans-serif;
+}
+
+/*prevents garbled korean*/
+h1, h2, h3, h4, h5, h6 {
+	text-rendering: auto;
+}
+
 .form-small .control-label {
     width: 100px;
 }
@@ -27,6 +36,45 @@
   margin-bottom: 0px;
 }
 
-a.favorite:hover {
+a.no-deco:hover {
 	text-decoration: none;
+}
+
+/*#selectedUsers>li {
+	margin-bottom: 0px;
+}*/
+
+span.h3 {
+  font-family: inherit;
+  font-weight: bold;
+  color: inherit;
+  font-size: 24.5px;
+}
+
+#selectedUsers {
+  margin-bottom: 0px;
+}
+
+#selectedUsers .thumbnail {
+  border-color: #3a87ad;
+}
+
+.unknownCard i {
+  font-size:3.4em
+}
+
+hr.thick {
+  height: 3px;  
+  background-color: #cccccc;
+  border: none;
+}
+
+#remainingChoices {
+  height: 70px;
+  line-height: 70px;
+}
+
+#selectComplete {
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
