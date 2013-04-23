@@ -15,48 +15,36 @@
       {{ flash[0] }}
       </div>
   {% endfor %}
-  <form class="form-horizontal form-small" method="post">
-    <legend>내 프로필</legend>
-    <div class="control-group">
-      <label class="control-label" for="input_nickname">닉네임</label>
-      <div class="controls">
-        <input class="input-large" type="text" 
+  <form class="center600" method="post">
+    <h3>내 프로필</h3>
+    <hr class="thick">
+    <h5>닉네임</h5>
+    <div class="row-fluid">
+      <div class="span4">
+        <input type="text" class="span10" 
                id="input_nickname" name="nickname" value="{{ user.nickname or '' }}">
       </div>
     </div>
-    <div class="control-group">
-      <label class="control-label" for="input_tag0">태그1</label>
-      <div class="controls">
-        <input class="input-large" type="text" 
-               id="input_tag0" name="tag0" value="{{ tags[0] or '' }}">
+    <h5>태그</h5>
+    <div class="row-fluid">
+      <div class="span4">
+        <input class="span10" type="text" name="tag" value="{{ user.tags[0] or '' }}">
+      </div>
+      <div class="span4">
+        <input class="span10 offset1" type="text" name="tag" value="{{ user.tags[1] or '' }}">
+      </div>
+      <div class="span4">
+        <input class="span10 offset2" type="text" name="tag" value="{{ user.tags[2] or '' }}">
       </div>
     </div>
-    <div class="control-group">
-      <label class="control-label" for="input_tag1">태그2</label>
-      <div class="controls">
-        <input class="input-large" type="text" 
-               id="input_tag1" name="tag1" value="{{ tags[1] or '' }}">
-      </div>
+    <h5>자기소개</h5>
+    <div class="row-fluid">
+      <textarea class="span12" rows="20"
+                name="profile">{{ user.profile }}</textarea>
     </div>
-    <div class="control-group">
-      <label class="control-label" for="input_tag2">태그3</label>
-      <div class="controls">
-        <input class="input-large" type="text" 
-               id="input_tag2" name="tag2" value="{{ tags[2] or '' }}">
-      </div>
-    </div>
-    <div class="control-group">
-      <label class="control-label" for="textarea_profile">자기소개</label>
-      <div class="controls">
-        <textarea rows="10" class="input-large" id="textarea_profile" 
-                  name="profile">{{ user.profile or '' }}</textarea>
-      </div>
-    </div>
-    <div class="control-group">
-      <div class="controls">
-        <button type="submit" class="btn btn-primary" 
-                name="change_account" value="change_account">저장하기</button>
-      </div>
+    <div class="row-fluid center-content">
+      <button type="submit" class="btn btn-large btn-primary" 
+              name="change_account" value="change_account">저장하기</button>
     </div>
   </form>
 {% endblock %}

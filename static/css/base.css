@@ -1,5 +1,13 @@
+/*background pattern
+@media only screen {
+  body {
+    background-image: url(../img/elegant_grid.png);
+    background-repeat: repeat;
+  }
+}*/
+
 body {
-  font-family: "Nanum Gothic", sans-serif;
+  font-family: "NanumGothic", sans-serif;
 }
 
 /*prevents garbled korean*/
@@ -36,13 +44,11 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 0px;
 }
 
+/* meet.html */
+
 a.no-deco:hover {
 	text-decoration: none;
 }
-
-/*#selectedUsers>li {
-	margin-bottom: 0px;
-}*/
 
 span.h3 {
   font-family: inherit;
@@ -51,15 +57,27 @@ span.h3 {
   font-size: 24.5px;
 }
 
-#selectedUsers {
+#selected-users {
   margin-bottom: 0px;
 }
 
-#selectedUsers .thumbnail {
+#selected-users .thumbnail {
   border-color: #3a87ad;
 }
 
-.unknownCard i {
+#show-profile-body .label-first, #selected-users .label-first {
+  background-color: #3a87ad;
+}
+
+#show-profile-body .label-second, #selected-users .label-second {
+  background-color: #c67605;
+}
+
+#show-profile-body .label-third, #selected-users .label-third {
+  background-color: #356635;
+}
+
+.unknown-card i {
   font-size:3.4em
 }
 
@@ -69,12 +87,28 @@ hr.thick {
   border: none;
 }
 
-#remainingChoices {
+#remaining-choices {
   height: 70px;
   line-height: 70px;
 }
 
-#selectComplete {
+#show-summary {
   margin-top: 10px;
   margin-bottom: 10px;
+}
+
+div.center-content {
+  text-align: center; 
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+
+.center600 {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+span.data {
+  white-space: pre;
+  word-wrap: break-word;
 }

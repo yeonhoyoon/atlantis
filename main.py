@@ -5,141 +5,88 @@ from datetime import datetime, timedelta
 import uuid
 import webapp2
 import jinja2
-from google.appengine.ext import db
 from webapp2_extras import sessions
+from model import User, Proposal, UserState
 import util
 import keys
-
-jinja_env = jinja2.Environment(autoescape = True,
-                               loader = jinja2.FileSystemLoader(
-                               os.path.join(os.path.dirname(__file__), 'templates')))
-
-
-class User(db.Model):
-    username = db.StringProperty(required=True)
-    password = db.StringProperty(required=True)
-    last_active = db.DateTimeProperty(required=True, auto_now=True)
-    created = db.DateTimeProperty(required=True, auto_now_add=True)
-    confirmed = db.BooleanProperty(required=True, default=False)
-
-    name = db.StringProperty()
-    phone = db.PhoneNumberProperty()
-    gender = db.CategoryProperty(choices=set(['M', 'F']))
-    contact_allowed_gender = db.CategoryProperty(choices=set(['M', 'F', 'MF']))
-    birth_year = db.IntegerProperty()
-    region = db.CategoryProperty()
-    nickname = db.StringProperty()
-    tags = db.StringProperty()
-    profile = db.TextProperty()
-    profile_uuid = db.StringProperty()
-    
-    remaining_choices = db.IntegerProperty(required=True, default=3)
-    remaining_proposals = db.IntegerProperty(required=True, default=1)
-    remaining_accepts = db.IntegerProperty(required=True, default=1)
-    is_matched = db.BooleanProperty(required=True, default=False)
-    last_match = db.DateTimeProperty()
-    is_active = db.BooleanProperty(required=True, default=True)
-
-    @classmethod
-    def by_username(cls, username):
-        user = cls.all().filter('username =', username).get()
-        return user
-
-    @classmethod
-    def validate(cls, name, password):
-        user = cls.by_username(name)
-        if user and util.check_password(password, user.password):
-            return user
-
-    def get_tags(self):
-        if self.tags:
-            return self.tags.split('|')
-        else: 
-            return ['', '', '']
-
-    def set_tags(self, tags):
-        if tags:
-            self.tags = '|'.join(map(lambda tag: tag.replace('|', ''), tags))
-
-
-class Proposal(db.Model):
-    from_user = db.ReferenceProperty(reference_class=User, required=True,
-                                     collection_name='sent_proposals')
-    to_user = db.ReferenceProperty(reference_class=User, required=True,
-                                   collection_name='received_proposals')
-    created = db.DateTimeProperty(required=True)
-    is_active = db.BooleanProperty(required=True)
-    is_accepted = db.BooleanProperty(required=True)
-
-
-class BaseHandler(webapp2.RequestHandler):
-    def write(self, *a, **kw):
-        self.response.write(*a, **kw)
-
-    def render_str(self, template, **params):
-        t = jinja_env.get_template(template)
-        return t.render(params)
-
-    def render(self, template, **kw):
-        self.write(self.render_str(template, **kw))
-
-    def set_secure_cookie(self, name, value):
-        cookie_value = util.make_cookie_value(value)
-        self.response.headers.add_header(
-            'Set-Cookie', 
-            '{0}={1}; Path=/'.format(name, cookie_value))
-
-    def read_secure_cookie(self, name):
-        cookie_value = self.request.cookies.get(name)
-        return cookie_value and util.check_cookie_value(cookie_value)
-
-    def login(self, user):
-        self.set_secure_cookie('user_id', str(user.key().id()))
-
-    def logout(self):
-        self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
-
-    def initialize(self, *a, **kw):
-        webapp2.RequestHandler.initialize(self, *a, **kw)
-        uid = self.read_secure_cookie('user_id')
-        self.user = uid and User.get_by_id(int(uid))
-
-    def dispatch(self):
-        self.session_store = sessions.get_store(request=self.request)        
-        try:
-            webapp2.RequestHandler.dispatch(self)
-        finally:
-            self.session_store.save_sessions(self.response)
-
-    @webapp2.cached_property
-    def session(self):
-        return self.session_store.get_session()
-
-    def current_uri(self):
-        return self.uri_for(self.__class__.__name__)
-
-    def save_user_and_redirect(self):
-        self.user.put()
-        self.session.add_flash(u'변경 사항을 저장하였습니다.', level='success')
-        self.redirect(self.current_uri())
-
-
-class LoginRequiredPage(BaseHandler):
-    def initialize(self, *a, **kw):
-        BaseHandler.initialize(self, *a, **kw)
-        if not self.user:
-            self.redirect('/login?returnurl=' + self.current_uri())
+from basehandlers import BaseHandler, LoginRequiredPage
 
 
 class MeetPage(LoginRequiredPage):
     def get(self):
-        q = User.all()
-        q.filter('last_active >', datetime.utcnow() - timedelta(days=3))
-        recent_users = q.run()
-        other_users = filter(lambda u: u.username != self.user.username, recent_users)
+        state = self.user.state
 
-        self.render('meet.html', other_users=other_users, user=self.user)
+        if state in [UserState.NO_PERSONAL_INFO, UserState.INACTIVE]:
+            self.redirect('/account')
 
+        elif state == UserState.NO_PROFILE:
+            self.redirect('/profile')
+
+        elif state == UserState.SHOW_ALL:
+            recent_users = User.get_recent_users()
+            other_users = filter(lambda u: u.username != self.user.username, recent_users)
+
+            self.render('show_all.html', other_users=other_users, user=self.user)
+
+        elif state == UserState.SHOW_SUMMARY:
+            selected_users = list(User.by_profile_uuids(self.user.selected_profile_uuids))
+
+            for user in selected_users:
+                user.profile_lines = user.get_random_profile_lines()
+
+            self.render('show_summary.html', selected_users=selected_users, user=self.user)
+
+        elif state == UserState.SHOW_PROFILE:
+            selected_users = list(User.by_profile_uuids(self.user.selected_profile_uuids))
+
+            if selected_users:
+                self.render('show_profile.html', other_user=selected_users[0], user=self.user)
+
+            else:
+                self.write('profile has changed, and is not present anymore')
+
+        else:
+            self.error(400)
+
+
+class ShowSummary(LoginRequiredPage):
+    def post(self):
+        selected_profile_uuids = self.request.get_all('selected_profile_uuids[]')[:3]
+        
+        if self.user.state == UserState.SHOW_ALL and selected_profile_uuids:
+            self.user.state = UserState.SHOW_SUMMARY
+            self.user.selected_profile_uuids = selected_profile_uuids
+            self.user.put()
+            self.write('success')
+        else:
+            self.error(400)
+
+
+class ShowProfile(LoginRequiredPage):
+    def post(self):
+        selected_profile_uuid = self.request.get('profile_uuid')
+        
+        if self.user.state == UserState.SHOW_SUMMARY and selected_profile_uuid:
+            self.user.state = UserState.SHOW_PROFILE
+            self.user.selected_profile_uuids = [selected_profile_uuid]
+            self.user.put()
+            self.write('success')
+        else:
+            self.error(400)
+
+
+class ShowProfile(LoginRequiredPage):
+    def post(self):
+        selected_profile_uuid = self.request.get('profile_uuid')
+        
+        if self.user.state == UserState.SHOW_SUMMARY and selected_profile_uuid:
+            self.user.state = UserState.SHOW_PROFILE
+            self.user.selected_profile_uuids = [selected_profile_uuid]
+            self.user.put()
+            self.write('success')
+        else:
+            self.error(400)
+            
 
 class TalkPage(LoginRequiredPage):
     def get(self):
@@ -150,20 +97,19 @@ class ProfilePage(LoginRequiredPage):
     def get(self):
         flashes = self.session.get_flashes()        
         self.render('profile.html', user=self.user, 
-                                    tags=self.user.get_tags(), 
                                     flashes=flashes)
 
     def post(self):
         nickname = self.request.get('nickname')
-        tag0 = self.request.get('tag0')
-        tag1 = self.request.get('tag1')
-        tag2 = self.request.get('tag2')
+        tags = self.request.get_all('tag')
         profile = self.request.get('profile')
 
+        if nickname != self.user.nickname or not self.user.profile_uuid:
+            self.user.profile_uuid = str(uuid.uuid1())
+
         self.user.nickname = nickname
-        self.user.set_tags([tag0, tag1, tag2])
+        self.user.tags = tags
         self.user.profile = profile
-        self.user.profile_uuid = str(uuid.uuid1())
 
         self.save_user_and_redirect()
 
@@ -265,27 +211,15 @@ class LogoutPage(BaseHandler):
         self.redirect('/')
 
 
-class TestPage(BaseHandler):
+class TestPage(webapp2.RequestHandler):
     def get(self):
-        users = User.all().run()
+        users = User.all()
 
         for user in users:
-            user.profile_uuid = str(uuid.uuid1())
+            user.state = UserState.SHOW_ALL
             user.put()
-
-        # hashed = util.make_password_hash('1234')
-
-        # for i in range(40):
-        #     user = User(username='abc' + str(i),
-        #                 name=u'실명' + str(i),
-        #                 phone=u'01024235231',
-        #                 password=hashed, 
-        #                 nickname=u'사용자' + str(i),
-        #                 profile=u'사용자 {}의 나의 멋진 프로필'.format(i))
-        #     user.set_tags([u'놀이공원',u'멋진 사람',u'예뻐요'])
-        #     user.put()
-
-        self.write('success')
+                
+        self.response.write('success!')
 
 config = {}
 config['webapp2_extras.sessions'] = {
@@ -294,6 +228,9 @@ config['webapp2_extras.sessions'] = {
 
 app = webapp2.WSGIApplication([('/', MainPage),
                                webapp2.Route('/meet', MeetPage, name='MeetPage'),
+                               webapp2.Route('/meet/show_summary', ShowSummary, name='ShowSummary'),
+                               webapp2.Route('/meet/show_profile', ShowProfile, name='ShowProfile'),
+                               webapp2.Route('/meet/propose', Propose, name='Propose'),
                                webapp2.Route('/talk', TalkPage, name='TalkPage'),
                                webapp2.Route('/profile', ProfilePage, name='ProfilePage'),
                                webapp2.Route('/account', AccountPage, name='AccountPage'),
