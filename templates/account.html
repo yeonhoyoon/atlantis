@@ -16,11 +16,15 @@
       </div>
   {% endfor %}
   <form class="form-horizontal form-small" method="post">
+    <input name=_xsrf_token type=hidden value="{{ xsrf_token }}">
     <legend>기본정보</legend>
     <div class="control-group">
       <label class="control-label" for="input_username">이메일</label>
-      <div class="controls">
-        <span class="uneditable-input" id="input_username">{{ user.username }}@snu.ac.kr</span>
+      <div class="row-fluid controls">
+        <div class="span3">
+          <span class="uneditable-input" 
+                id="input_username">{{ user.username }}@snu.ac.kr</span> 
+        </div>
       </div>
     </div>
     <div class="control-group">
@@ -45,6 +49,7 @@
     </div>
   </form>
   <form class="form-horizontal form-small" method="post">
+    <input name=_xsrf_token type=hidden value="{{ xsrf_token }}">
     <legend>비밀번호 변경</legend>
     {% for error_key in password_errors %}
       <div class="alert">

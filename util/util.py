@@ -2,6 +2,9 @@ import re
 import hmac
 from library.pybcrypt import bcrypt
 import keys
+import webapp2
+from webapp2_extras import sessions, auth
+import xsrf
 
 COOKIE_SEPARATOR = '|'
 
@@ -21,6 +24,16 @@ def make_password_hash(password):
 def check_password(password, hashed):
     return bcrypt.hashpw(password, hashed) == hashed
 
+def set_secure_cookie(response, name, value):
+    cookie_value = make_cookie_value(value)
+    response.headers.add_header(
+        'Set-Cookie', 
+        '{0}={1}; Path=/; HttpOnly'.format(name, cookie_value))
+
+def read_secure_cookie(request, name):
+    cookie_value = request.cookies.get(name)
+    return cookie_value and check_cookie_value(cookie_value)
+
 def pad(l, content, width):
     l.extend([content] * (width - len(l)))
     return l
@@ -31,11 +44,7 @@ def tokenize_sentences(text):
     return filter(lambda s: s, map(lambda s: s.strip(), sentence_separators.split(text)))
 
 def shorten_if_long(sentence):
-    #return str(type(sentence))
-    #for i in range(10):
-
     if len(sentence) > 45:
         return sentence[:45].strip() + '...'
     else:
         return sentence
-

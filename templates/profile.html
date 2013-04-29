@@ -16,6 +16,7 @@
       </div>
   {% endfor %}
   <form class="center600" method="post">
+    <input name=_xsrf_token type=hidden value="{{ xsrf_token }}">
     <h3>내 프로필</h3>
     <hr class="thick">
     <h5>닉네임</h5>
@@ -40,7 +41,7 @@
     <h5>자기소개</h5>
     <div class="row-fluid">
       <textarea class="span12" rows="20"
-                name="profile">{{ user.profile }}</textarea>
+                name="profile">{{ user.profile or '' }}</textarea>
     </div>
     <div class="row-fluid center-content">
       <button type="submit" class="btn btn-large btn-primary" 

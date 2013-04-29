@@ -112,3 +112,9 @@ span.data {
   white-space: pre;
   word-wrap: break-word;
 }
+
+.alert a.pull-right {
+  padding: 0px; 
+  line-height:20px; 
+  margin-right:-25px; 
+}

@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-<form class="form-horizontal pull-right" method="post">
+<form id="signup-form" class="form-horizontal pull-right" method="post" action="/create_account">
   <legend>가입하기</legend>
   {% for error_key in errors %}
     <div class="alert">
@@ -26,7 +26,7 @@
       <input type="password" name="verify" placeholder="비밀번호 확인">
   </div>
   <div class="control-group">
-      <button type="submit" class="btn btn-success">가입하기</button>
+    <button type="submit" class="btn btn-success">가입하기</button>
   </div>
 </form>
 {% endblock %}

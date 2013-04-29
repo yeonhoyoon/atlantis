@@ -1,4 +1,4 @@
-$(".user-card a.select").click(function(event) {
+$(".user-card a.select").click(function() {
 	var currentCard = $(this).parents(".user-card");
 	var profile_uuid = currentCard.find(".profile-uuid").attr("value");
 	var isSelected = getSelectedCard(profile_uuid).length > 0;
@@ -31,7 +31,9 @@ $(".user-card a.select").click(function(event) {
 	}
 });
 
-$("#show-summary").click(function () {
+$("#show-summary").click(function (event) {
+	event.preventDefault();
+
 	var selected_profile_uuids = $("#selected-users .user-card .profile-uuid")
 																	.map(function() { return this.value }).get(); 
 
@@ -45,7 +47,9 @@ $("#show-summary").click(function () {
 		});
 });
 
-$(".show-profile").click(function () {
+$(".show-profile").click(function (event) {
+event.preventDefault();
+
 var profile_uuid = $(this).parents(".user-card").find(".profile-uuid").attr("value");
 
 	$.post('/meet/show_profile', 
@@ -55,7 +59,9 @@ var profile_uuid = $(this).parents(".user-card").find(".profile-uuid").attr("val
 		});
 });
 
-$("#propose").click(function () {
+$("#propose").click(function (event) {
+event.preventDefault();
+
 var profile_uuid = $("#show-profile-body").find(".profile-uuid").attr("value");
 
 	$.post('/meet/propose', 

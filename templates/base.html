@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>{% block title %}{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="http://www.google.com/jsapi"></script>
+    <script src="https://www.google.com/jsapi"></script>
     <script>
        google.load( "webfont", "1" );
        google.setOnLoadCallback(function() {
@@ -24,7 +24,9 @@
       }
     </style>
     <link rel="stylesheet" href="static/css/bootstrap-responsive.min.css">
-    <link rel="shortcut icon" href="static/img/favicon.ico">
+    {% if user_info %}
+      <meta name="_xsrf_token" content="{{ xsrf_token }}">
+    {% endif %}
   </head>
   <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -42,7 +44,7 @@
               <li><a href="talk">얘기해요</a></li>
             </ul>
             <ul class="nav pull-right">
-              {% if user %}
+              {% if user_info %}
                 <li><a href="profile">내 프로필</a></li>
                 <li><a href="account">설정</a></li>
                 <li><a href="logout">로그아웃</a></li>
@@ -65,8 +67,32 @@
           </div>
         </div>
       </div>
-    </div>
-    <div id="mainContent" class="container">
+    </div>    
+    <div class="container">
+      {% if user_info and user_info.state == 'NOT_AUTH' %}
+        <div class="alert">
+          <i class="icon-envelope"></i>
+          <span>{{ user_info.username }}@snu.ac.kr로 전송된 메일을 확인해 가입 절차를 완료해 주세요.</span>
+          <a href="http://my.snu.ac.kr" target="_blank">메일 확인</a>
+          <a id="send-verification-email" class="pull-right" href="#">인증 메일 재전송</a>            
+        </div>  
+        <div id="verification-email-sent-modal" 
+             class="modal hide fade" tabindex="-1" role="dialog" 
+             aria-labelledby="myModalLabel" aria-hidden="true">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="myModalLabel">인증 메일 전송</h3>
+          </div>
+          <div class="modal-body">
+            <p>{{ user_info.username }}@snu.ac.kr로 인증 메일을 전송하였습니다.</p>
+            <p>메일 안에 있는 링크를 클릭하여 메일 주소를 인증해 주세요.</p>
+          </div>
+          <div class="modal-footer">
+            <a class="pull-left" href="http://my.snu.ac.kr" target="_blank">메일 확인</a>
+            <a class="btn btn-info" data-dismiss="modal" aria-hidden="true">확인</a>
+          </div>
+        </div>        
+      {% endif %}
       {% block content %}
         
       {% endblock %}
@@ -74,6 +100,9 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="static/js/bootstrap.min.js"></script>
     <script src="static/js/bootstrapx-clickover.js"></script>
-    <script src="static/js/meet.js"></script>
+    <script src="static/js/base.js"></script>
+    {% block scripts %}
+      
+    {% endblock %}           
   </body>
 </html>
