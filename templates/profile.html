@@ -5,16 +5,6 @@
 {% endblock %}
 
 {% block content %}
-  {% for flash in flashes %}
-    {% if flash[1] == 'success' %}
-      <div class="alert alert-success">
-    {% else %}
-      <div class="alert">
-    {% endif %}
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-      {{ flash[0] }}
-      </div>
-  {% endfor %}
   <form class="center600" method="post">
     <input name=_xsrf_token type=hidden value="{{ xsrf_token }}">
     <h3>내 프로필</h3>

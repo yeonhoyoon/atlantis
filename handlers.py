@@ -117,10 +117,7 @@ class ProfilePage(LoginRequiredHandler):
         if nickname != self.user.nickname or not self.user.profile_uuid:
             self.user.profile_uuid = str(uuid.uuid1())
 
-        self.user.nickname = nickname
-        self.user.tags = tags
-        self.user.profile = profile
-
+        self.user.populate(nickname=nickname, tags=tags, profile=profile)
         self.save_user_and_reload()
 
 
@@ -137,8 +134,7 @@ class AccountPage(LoginRequiredHandler):
         verify_new_password = self.request.get('verify_new_password')
 
         if self.request.get('change_account'):
-            self.user.name = name
-            self.user.phone = phone
+            self.user.populate(name=name, phone=phone)
             self.save_user_and_reload()
 
         elif self.request.get('change_password'):
@@ -188,7 +184,7 @@ class CreateAccount(BaseHandler):
         if not username:
             errors['username'] = u"이메일 주소를 입력해 주세요."
 
-        duplicate_user = User.get_by_username(username)
+        duplicate_user = User.get_by_id(username)
         if duplicate_user:
             errors['username_error'] = u"이미 등록된 사용자입니다."
 
@@ -231,7 +227,7 @@ class Verify(BaseHandler):
         if User.validate_signup_token(username, signup_token):
             User.delete_signup_token(username, signup_token)
 
-            user = User.get_by_username(username)
+            user = User.get_by_id(username)
             user.state = UserState.SHOW_ALL
             user.update_state()
 

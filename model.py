@@ -1,41 +1,40 @@
 import random
 from datetime import datetime, timedelta
 from exceptions import NotImplementedError
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 from webapp2_extras import auth, security
 import keys
 from util import util
 import logging
 
-class UserToken(db.Model):
-    created = db.DateTimeProperty(auto_now_add=True)
-    updated = db.DateTimeProperty(auto_now=True)
-    username = db.StringProperty(required=True, indexed=False)
-    subject = db.StringProperty(required=True)
-    token = db.StringProperty(required=True)
+class UserToken(ndb.Model):
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    updated = ndb.DateTimeProperty(auto_now=True)
+    username = ndb.StringProperty(required=True, indexed=False)
+    subject = ndb.StringProperty(required=True)
+    token = ndb.StringProperty(required=True)
 
     @classmethod
     def get_key(cls, username, subject, token):
-        return db.Key.from_path('UserToken', 
-                                '%s.%s.%s' % (str(username), subject, token)).name()
+        return ndb.Key(cls, '%s.%s.%s' % (str(username), subject, token))
 
     @classmethod
     def create(cls, username, subject, token=None):
         token = token or security.generate_random_string(entropy=128)
         key = cls.get_key(username, subject, token)
-        entity = cls(key_name=key, username=username, subject=subject, token=token)
+        entity = cls(key=key, username=username, subject=subject, token=token)
         entity.put()
         return entity
 
     @classmethod
     def get(cls, username, subject=None, token=None):
         if username and subject and token:
-            return cls.get_by_key_name(cls.get_key(username, subject, token))
+            return cls.get_key(username, subject, token).get()
 
         assert subject and token, \
             'subject and token must be provided to UserToken.get().'
 
-        return cls.all().filter('subject =', subject).filter('token =', token).get()
+        return cls.query(cls.subject == subject, cls.token == token).get()
 
 
 class UserState:
@@ -51,34 +50,34 @@ class UserState:
     COUPLED = 'COUPLED'
 
 
-class User(db.Model):
-    username = db.StringProperty(required=True)
-    password = db.StringProperty(required=True)
-    last_active = db.DateTimeProperty(required=True, auto_now=True)
-    created = db.DateTimeProperty(required=True, auto_now_add=True)
+class User(ndb.Model):
+    username = ndb.StringProperty(required=True)
+    password = ndb.StringProperty(required=True)
+    last_active = ndb.DateTimeProperty(required=True, auto_now=True)
+    created = ndb.DateTimeProperty(required=True, auto_now_add=True)
 
-    name = db.StringProperty()
-    phone = db.PhoneNumberProperty()
-    gender = db.CategoryProperty(choices=set(['M', 'F']))
-    contact_allowed_gender = db.CategoryProperty(choices=set(['M', 'F', 'MF']))
-    birth_year = db.IntegerProperty()
-    region = db.CategoryProperty()
-    nickname = db.StringProperty()
-    tags = db.StringListProperty()
-    profile = db.TextProperty()
-    profile_uuid = db.StringProperty()
+    name = ndb.StringProperty()
+    phone = ndb.StringProperty()
+    gender = ndb.StringProperty(choices=set(['M', 'F']))
+    contact_allowed_gender = ndb.StringProperty(choices=set(['M', 'F', 'MF']))
+    birth_year = ndb.IntegerProperty()
+    region = ndb.StringProperty()
+    nickname = ndb.StringProperty()
+    tags = ndb.StringProperty(repeated=True)
+    profile = ndb.TextProperty()
+    profile_uuid = ndb.StringProperty()
     
-    state = db.CategoryProperty(required=True, default=UserState.NOT_AUTH,
-                                choices=set([UserState.NOT_AUTH, UserState.INACTIVE,
-                                             UserState.NO_PERSONAL_INFO, UserState.NO_PROFILE,
-                                             UserState.SHOW_ALL, UserState.SHOW_SUMMARY, UserState.SHOW_PROFILE,
-                                             UserState.PROPOSED, UserState.MATCHED, UserState.COUPLED]))
-    state_changed = db.DateTimeProperty(required=True, auto_now_add=True)
-    selected_profile_uuids = db.StringListProperty()
+    state = ndb.StringProperty(default=UserState.NOT_AUTH,
+                               choices=set([UserState.NOT_AUTH, UserState.INACTIVE,
+                                            UserState.NO_PERSONAL_INFO, UserState.NO_PROFILE,
+                                            UserState.SHOW_ALL, UserState.SHOW_SUMMARY, UserState.SHOW_PROFILE,
+                                            UserState.PROPOSED, UserState.MATCHED, UserState.COUPLED]))
+    state_changed = ndb.DateTimeProperty(required=True, auto_now_add=True)
+    selected_profile_uuids = ndb.StringProperty(repeated=True)
 
     @classmethod
     def create_user(cls, username, raw_password):
-        user = User(key_name=username, username=username, 
+        user = User(id=username, username=username, 
                     password=security.generate_password_hash(raw_password, length=12))
         user.put()
         return user
@@ -86,17 +85,12 @@ class User(db.Model):
     def set_password(self, raw_password):
         self.password = security.generate_password_hash(raw_password, length=12)
 
-    @classmethod
-    def get_by_username(cls, username):
-        user = cls.all().filter('username =', username).get()
-        return user
-
     def get_id(self):
-        return self.username
+        return self._key.id()
 
     @classmethod
     def get_by_auth_password(cls, username, password):
-        user = cls.get_by_username(username)
+        user = cls.get_by_id(username)
         if not user:
             raise auth.InvalidAuthIdError()
 
@@ -107,7 +101,15 @@ class User(db.Model):
 
     @classmethod
     def get_by_auth_token(cls, username, token):
-        raise NotImplementedError
+        token_key = UserToken.get_key(user_id, 'auth', token)
+        user_key = ndb.Key(cls, user_id)
+        # Use get_multi() to save a RPC call.
+        valid_token, user = ndb.get_multi([token_key, user_key])
+        if valid_token and user:
+            timestamp = int(time.mktime(valid_token.created.timetuple()))
+            return user, timestamp
+
+        return None, None
 
     @classmethod
     def create_auth_token(cls, username):
@@ -115,7 +117,7 @@ class User(db.Model):
 
     @classmethod
     def delete_auth_token(cls, username, token):
-        UserToken.get(username, 'auth', token).delete()
+        UserToken.get_key(username, 'auth', token).delete()
 
     @classmethod
     def create_signup_token(cls, username):
@@ -128,18 +130,17 @@ class User(db.Model):
 
     @classmethod
     def delete_signup_token(cls, username, token):
-        UserToken.get(username, 'signup', token).delete()
+        UserToken.get_key(username, 'signup', token).delete()
 
     @classmethod
     def by_profile_uuids(cls, profile_uuids):
-        users = cls.all().filter('profile_uuid IN', profile_uuids).run()
+        users = cls.query().filter(cls.profile_uuid.IN(profile_uuids)).iter()
         return users
 
     @classmethod
     def get_recent_users(cls):
-        q = cls.all()
-        q.filter('last_active >', datetime.utcnow() - timedelta(days=3))
-        recent_users = q.run()
+        q = cls.query().filter(cls.last_active > datetime.utcnow() - timedelta(days=3))
+        recent_users = q.iter()
         return recent_users
 
     def get_random_profile_lines(self):
@@ -165,11 +166,9 @@ class User(db.Model):
         #     self.put()
 
 
-class Proposal(db.Model):
-    from_user = db.ReferenceProperty(reference_class=User, required=True,
-                                     collection_name='sent_proposals')
-    to_user = db.ReferenceProperty(reference_class=User, required=True,
-                                   collection_name='received_proposals')
-    created = db.DateTimeProperty(required=True)
-    is_active = db.BooleanProperty(required=True)
-    is_accepted = db.BooleanProperty(required=True)
+class Proposal(ndb.Model):
+    from_user = ndb.KeyProperty(kind=User, required=True)
+    to_user = ndb.KeyProperty(kind=User, required=True)
+    created = ndb.DateTimeProperty(required=True)
+    is_active = ndb.BooleanProperty(required=True)
+    is_accepted = ndb.BooleanProperty(required=True)

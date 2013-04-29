@@ -91,7 +91,19 @@
             <a class="pull-left" href="http://my.snu.ac.kr" target="_blank">메일 확인</a>
             <a class="btn btn-info" data-dismiss="modal" aria-hidden="true">확인</a>
           </div>
-        </div>        
+        </div>
+      {% for flash in flashes %}
+        {% if flash[1] == 'success' %}
+          <div class="alert alert-success">
+        {% elif flash[1] == 'info' %}
+          <div class="alert alert-info">
+        {% else %}
+          <div class="alert">
+        {% endif %}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          {{ flash[0] }}
+          </div>
+      {% endfor %}
       {% endif %}
       {% block content %}
         

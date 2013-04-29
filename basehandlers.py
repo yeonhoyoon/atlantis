@@ -46,7 +46,7 @@ class BaseHandler(webapp2.RequestHandler):
     @webapp2.cached_property
     def user(self):
         u = self.user_info
-        us = self.user_model.get_by_key_name(u['username']) if u else None
+        us = self.user_model.get_by_id(u['username']) if u else None
         return us
 
     @webapp2.cached_property
