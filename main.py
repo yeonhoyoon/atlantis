@@ -23,7 +23,7 @@ config = {
   },
   'webapp2_extras.auth': {
     'user_model': 'model.User',
-    'user_attributes': ['username', 'state']
+    'user_attributes': ['username']
   }
 }
 

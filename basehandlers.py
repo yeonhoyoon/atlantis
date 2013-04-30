@@ -27,7 +27,7 @@ class BaseHandler(webapp2.RequestHandler):
         t = jinja_env.get_template(template)
         
         if self.logged_in:
-            params['user_info'] = self.user_info
+            params['user'] = self.user
             params['xsrf_token'] = self.xsrf_token
 
         return t.render(params)
@@ -46,8 +46,7 @@ class BaseHandler(webapp2.RequestHandler):
     @webapp2.cached_property
     def user(self):
         u = self.user_info
-        us = self.user_model.get_by_id(u['username']) if u else None
-        return us
+        return self.user_model.get_by_id(u['username']) if u else None
 
     @webapp2.cached_property
     def logged_in(self):
@@ -88,10 +87,19 @@ class BaseHandler(webapp2.RequestHandler):
         finally:
             self.session_store.save_sessions(self.response)
    
-
     def current_uri(self):
         return self.uri_for(self.__class__.__name__)
 
+    def redirect_first(self, to):
+        self.redirect('{0}?returnurl={1}' + self.current_uri(), abort=True)
+
+    def return_or_redirect(self, to):
+        returnurl = self.request.get('returnurl')
+        if returnurl:
+            self.redirect(str(returnurl))
+        else:
+            self.redirect(to)
+    
     def save_user_and_reload(self):
         self.user.put()
         self.session.add_flash(u'변경 사항을 저장하였습니다.', level='success')
@@ -103,7 +111,7 @@ class LoginRequiredHandler(BaseHandler):
         BaseHandler.initialize(self, *a, **kw)
 
         if not self.logged_in:
-            self.redirect('/login?returnurl=' + self.current_uri(), abort=True)
-        elif (self.user_info['state'] == UserState.NOT_AUTH and 
-           self.request.path not in ['/account', '/profile', '/send_verification_email']):
-           self.redirect('/account', abort=True)
+            self.redirect_first('/login')
+        elif not (self.user.verified or
+            self.request.path in ['/account', '/profile', '/send_verification_email']):
+            self.redirect('/account', abort=True)

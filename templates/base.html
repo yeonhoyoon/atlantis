@@ -24,7 +24,7 @@
       }
     </style>
     <link rel="stylesheet" href="static/css/bootstrap-responsive.min.css">
-    {% if user_info %}
+    {% if user %}
       <meta name="_xsrf_token" content="{{ xsrf_token }}">
     {% endif %}
   </head>
@@ -41,10 +41,10 @@
           <div class="nav-collapse collapse">
             <ul class="nav">
               <li><a href="meet">만나요</a></li>
-              <li><a href="talk">얘기해요</a></li>
+              <!-- <li><a href="talk">얘기해요</a></li> -->
             </ul>
             <ul class="nav pull-right">
-              {% if user_info %}
+              {% if user %}
                 <li><a href="profile">내 프로필</a></li>
                 <li><a href="account">설정</a></li>
                 <li><a href="logout">로그아웃</a></li>
@@ -69,10 +69,10 @@
       </div>
     </div>    
     <div class="container">
-      {% if user_info and user_info.state == 'NOT_AUTH' %}
+      {% if user and not user.verified %}
         <div class="alert">
           <i class="icon-envelope"></i>
-          <span>{{ user_info.username }}@snu.ac.kr로 전송된 메일을 확인해 가입 절차를 완료해 주세요.</span>
+          <span>{{ user.username }}@snu.ac.kr로 전송된 메일을 확인해 가입 절차를 완료해 주세요.</span>
           <a href="http://my.snu.ac.kr" target="_blank">메일 확인</a>
           <a id="send-verification-email" class="pull-right" href="#">인증 메일 재전송</a>            
         </div>  
@@ -84,7 +84,7 @@
             <h3 id="myModalLabel">인증 메일 전송</h3>
           </div>
           <div class="modal-body">
-            <p>{{ user_info.username }}@snu.ac.kr로 인증 메일을 전송하였습니다.</p>
+            <p>{{ user.username }}@snu.ac.kr로 인증 메일을 전송하였습니다.</p>
             <p>메일 안에 있는 링크를 클릭하여 메일 주소를 인증해 주세요.</p>
           </div>
           <div class="modal-footer">
@@ -92,6 +92,7 @@
             <a class="btn btn-info" data-dismiss="modal" aria-hidden="true">확인</a>
           </div>
         </div>
+      {% endif %}
       {% for flash in flashes %}
         {% if flash[1] == 'success' %}
           <div class="alert alert-success">
@@ -104,7 +105,6 @@
           {{ flash[0] }}
           </div>
       {% endfor %}
-      {% endif %}
       {% block content %}
         
       {% endblock %}

@@ -1,11 +1,10 @@
-{% extends "base.html" %}
+{% extends "meet.html" %}
 
 {% block title %}
     만나요
 {% endblock %}
 
-{% block content %}
-
+{% block meet_content %}
 <ul class="thumbnails" id="selected-users">
 	{% for selected_user in selected_users %}
 <li class="span4 user-card">

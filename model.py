@@ -1,5 +1,6 @@
 import random
 from datetime import datetime, timedelta
+import time
 from exceptions import NotImplementedError
 from google.appengine.ext import ndb
 from webapp2_extras import auth, security
@@ -38,10 +39,8 @@ class UserToken(ndb.Model):
 
 
 class UserState:
-    NOT_AUTH = 'NOT_AUTH'
     NO_PERSONAL_INFO = 'NO_PERSONAL_INFO' 
     NO_PROFILE = 'NO_PROFILE'
-    INACTIVE = 'INACTIVE'
     SHOW_ALL = 'SHOW_ALL'
     SHOW_SUMMARY = 'SHOW_SUMMARY'
     SHOW_PROFILE = 'SHOW_PROFILE'
@@ -67,13 +66,14 @@ class User(ndb.Model):
     profile = ndb.TextProperty()
     profile_uuid = ndb.StringProperty()
     
-    state = ndb.StringProperty(default=UserState.NOT_AUTH,
-                               choices=set([UserState.NOT_AUTH, UserState.INACTIVE,
-                                            UserState.NO_PERSONAL_INFO, UserState.NO_PROFILE,
+    state = ndb.StringProperty(default=UserState.SHOW_ALL,
+                               choices=set([UserState.NO_PERSONAL_INFO, UserState.NO_PROFILE,
                                             UserState.SHOW_ALL, UserState.SHOW_SUMMARY, UserState.SHOW_PROFILE,
                                             UserState.PROPOSED, UserState.MATCHED, UserState.COUPLED]))
     state_changed = ndb.DateTimeProperty(required=True, auto_now_add=True)
     selected_profile_uuids = ndb.StringProperty(repeated=True)
+    verified = ndb.BooleanProperty(default=False)
+    active = ndb.BooleanProperty(default=True)
 
     @classmethod
     def create_user(cls, username, raw_password):
@@ -101,8 +101,8 @@ class User(ndb.Model):
 
     @classmethod
     def get_by_auth_token(cls, username, token):
-        token_key = UserToken.get_key(user_id, 'auth', token)
-        user_key = ndb.Key(cls, user_id)
+        token_key = UserToken.get_key(username, 'auth', token)
+        user_key = ndb.Key(cls, username)
         # Use get_multi() to save a RPC call.
         valid_token, user = ndb.get_multi([token_key, user_key])
         if valid_token and user:
@@ -150,20 +150,17 @@ class User(ndb.Model):
         random_profile_lines = [util.shorten_if_long(l) for l in random_profile_lines]
         return random_profile_lines
 
-    def update_state(self):
-        self.put()
-        # if self.state == UserState.NOT_AUTH:
-        #     pass
-        # else:
-        #     if not (self.nickname and self.tags and self.profile):
-        #         self.state = UserState.NO_PROFILE
-        #     elif not (self.name and self.phone):
-        #         self.state = UserState.NO_PERSONAL_INFO
-        #     else:
-        #         self.state = UserState.SHOW_ALL
+    def set_state(self, new_state):
+        self.state = new_state
+        self.state_changed = datetime.now()
 
-        #     self.state_changed = datetime.now()
-        #     self.put()
+    def _pre_put_hook(self):
+        if not (self.name and self.phone):
+            self.set_state(UserState.NO_PERSONAL_INFO)
+        elif not (self.nickname and self.profile and not self.profile.isspace()):
+            self.set_state(UserState.NO_PROFILE)
+        elif self.state in [UserState.NO_PERSONAL_INFO, UserState.NO_PROFILE]:
+            self.set_state(UserState.SHOW_ALL)
 
 
 class Proposal(ndb.Model):

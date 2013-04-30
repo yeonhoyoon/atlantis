@@ -57,7 +57,7 @@ span.h3 {
   font-size: 24.5px;
 }
 
-#selected-users {
+.no-margin-bottom {
   margin-bottom: 0px;
 }
 

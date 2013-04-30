@@ -19,13 +19,15 @@ class MeetPage(LoginRequiredHandler):
     def get(self):
         state = self.user.state
 
-        if state == UserState.NOT_AUTH:
+        if not self.user.verified:
             self.write('Account Not Authorized')
 
-        elif state in [UserState.NO_PERSONAL_INFO, UserState.INACTIVE]:
+        elif state == UserState.NO_PERSONAL_INFO or not self.user.active:
+            self.session.add_flash(u'먼저 기본정보를 작성해 주세요.', level='info')
             self.redirect('/account')
 
         elif state == UserState.NO_PROFILE:
+            self.session.add_flash(u'먼저 프로필을 작성해 주세요.', level='info')
             self.redirect('/profile')
 
         elif state == UserState.SHOW_ALL:
@@ -105,9 +107,13 @@ class TalkPage(LoginRequiredHandler):
 
 class ProfilePage(LoginRequiredHandler):
     def get(self):
-        flashes = self.session.get_flashes()        
+        first_login = self.session.pop('first_login', None)
+
+        flashes = self.session.get_flashes()
+        logging.info('flashes : ' + str(flashes))        
         self.render('profile.html', user=self.user, 
-                                    flashes=flashes)
+                                    flashes=flashes,
+                                    first_login=first_login)
 
     def post(self):
         nickname = self.request.get('nickname')
@@ -156,10 +162,9 @@ class AccountPage(LoginRequiredHandler):
 class MainPage(BaseHandler):
     def get(self):
         if self.logged_in:
-            first_login = self.session.pop('first_login', None)
-            self.render('main.html', first_login=first_login)
+            self.redirect('/meet')
         else:
-           self.render('signup.html')
+            self.render('signup.html')
 
 
 class CreateAccount(BaseHandler):
@@ -176,7 +181,7 @@ class CreateAccount(BaseHandler):
             self.auth.set_session(self.auth.store.user_to_dict(user))
 
             self.session['first_login'] = True
-            self.redirect('/')
+            self.redirect('/profile')
 
     def get_errors(self, username, password, verify):
         errors = {}
@@ -247,11 +252,8 @@ class LoginPage(BaseHandler):
 
         try:
             user = self.auth.get_user_by_password(username, password, save_session=True)
-            returnurl = self.request.get('returnurl')
-            if returnurl:
-                self.redirect(str(returnurl))
-            else:
-                self.redirect('/')
+            self.return_or_redirect('/')
+
         except (InvalidAuthIdError, InvalidPasswordError) as e:
             self.render('login.html', login_error=True)
 
@@ -264,5 +266,46 @@ class LogoutPage(BaseHandler):
 
 class TestPage(webapp2.RequestHandler):
     def get(self):
-        token = util.generate_xsrf_token()
-        self.response.write(token)
+        for i in range(15):
+            user = User.create_user(username='snudatetest' + str(i), raw_password='1234')
+            user.nickname = '사용자' + str(i)
+            user.tags = [u'예쁘고', u'착하고', u'똑똑한']
+            user.profile = """
+그대가 돌아서면 두 눈이 마주칠까
+심장이 Bounce Bounce 두근대 들릴까 봐 겁나
+
+한참을 망설이다 용기를 내
+밤새워 준비한 순애보 고백해도 될까
+
+처음 본 순간부터 네 모습이 
+내 가슴 울렁이게 만들었어
+Baby You're my trampoline
+You make me Bounce Bounce
+
+수많은 인연과 바꾼 너인 걸
+사랑이 남긴 상처들도 감싸줄게
+
+어쩌면 우린 벌써 알고 있어
+그토록 찾아 헤맨 사랑의 꿈
+외롭게만 하는 걸
+You make me Bounce You make me Bounce
+
+Bounce Bounce
+망설여져 나 혼자만의 감정일까
+내가 잘못 생각한 거라면 어떡하지 눈물이나
+
+별처럼 반짝이는 눈망울도
+수줍어 달콤하던 네 입술도
+내겐 꿈만 같은 걸
+You make me Bounce
+
+어쩌면 우린 벌써 알고 있어
+그토록 찾아 헤맨 사랑의 꿈
+외롭게만 하는 걸 어쩌면 우린 벌써
+You make me~ You make me~"""
+
+            user.profile_uuid = str(uuid.uuid1())
+            user.verified = True
+            user.put()
+
+        self.response.write('success')
