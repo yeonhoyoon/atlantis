@@ -4,8 +4,56 @@
     얘기해요
 {% endblock %}
 
+{% block headscripts %}
+	<script src='https://cdn.firebase.com/v0/firebase.js'></script>
+{% endblock %}
+
 {% block content %}
-  <h2>얘기해요 - coming soon</h2>
-</form>
+<input id="firebase_token" type="hidden" value="{{ firebase_token }}">
+<input id="nickname" type="hidden" value="{{ user.nickname or '' }}">
+<input id="username" type="hidden" value="{{ user.username or '' }}">
+
+<div class="row">
+	<div class="row">
+		<div id="write-talk" class="center300">
+			<div id="write-talk-controls" class="row-fluid">
+				<input id="write-talk-name" class="no-margin-bottom input-small" type="text"
+							 placeholder="{{ user.nickname or '' }}"
+							 value="{{ user.nickname or '' }}">
+				<button id="write-talk-post" 
+								class="btn pull-right" style="width:27%;">
+								<i class="icon-arrow-right"></i>
+				</button>	
+			</div>
+			<textarea id="write-talk-content" style="width:290px" rows="3" 
+								placeholder="무슨 생각 중이세요?"></textarea>							
+			<hr class="thick">
+			<div id="spinner" class="text-center">
+				<i class="icon-spinner icon-spin icon-3x"></i>			
+			</div>
+		</div>
+	</div>
+</div>
+<div id="talks" class="row">
+</div>
+
+<div id="talk-template" class="row hide">
+	<div class="talk center300">
+		<div class="row-fluid">
+			<strong class="talk-name">name</strong>
+			<i class="icon-ok-circle text-success"></i>
+			<span class="talk-time pull-right">time</span>
+		</div>
+		<div class="row-fluid">
+			<span class="talk-content data">content</span>
+		</div>
+	</div>
+</div>	
+{% endblock %}
+
+{% block scripts %}
+	<script src='static/js/jquery.autogrow-textarea.js'></script>
+	<script src='static/js/moment.min.js'></script>
+	<script src='static/js/talk.js'></script>
 {% endblock %}
     

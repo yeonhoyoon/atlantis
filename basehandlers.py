@@ -14,8 +14,8 @@ import logging
 import main
 
 
-jinja_env = jinja2.Environment(autoescape = True,
-                               loader = jinja2.FileSystemLoader(
+jinja_env = jinja2.Environment(autoescape=True,
+                               loader=jinja2.FileSystemLoader(
                                os.path.join(os.path.dirname(__file__), 'templates')))
 
 
@@ -29,6 +29,9 @@ class BaseHandler(webapp2.RequestHandler):
         if self.logged_in:
             params['user'] = self.user
             params['xsrf_token'] = self.xsrf_token
+
+        flashes = self.session.get_flashes()    
+        params['flashes'] = flashes
 
         return t.render(params)
 
@@ -64,19 +67,19 @@ class BaseHandler(webapp2.RequestHandler):
     def xsrf_token(self):
         token = util.read_secure_cookie(self.request, '_xsrf_token')
         if not token:
-            token = xsrf.XSRFToken(user_id=self.user_info['username'], 
+            token = xsrf.XSRFToken(user_id=self.user_info['username'],
                                    secret=keys.XSRF_SECRET).generate_token_string()
             util.set_secure_cookie(self.response, '_xsrf_token', token)
         return token
 
     def check_xsrf_token(self):
         if self.request.method == 'POST' and self.logged_in:
-            received_token = (self.request.get('_xsrf_token') or 
+            received_token = (self.request.get('_xsrf_token') or
                               self.request.headers.get('X-XSRF-Token'))
 
             if not self.xsrf_token or self.xsrf_token != received_token:
                 self.abort(403)
-    
+
     def dispatch(self):
         self.session_store = sessions.get_store(request=self.request)        
 
@@ -91,7 +94,7 @@ class BaseHandler(webapp2.RequestHandler):
         return self.uri_for(self.__class__.__name__)
 
     def redirect_first(self, to):
-        self.redirect('{0}?returnurl={1}' + self.current_uri(), abort=True)
+        self.redirect('{0}?returnurl={1}'.format(to, self.current_uri()), abort=True)
 
     def return_or_redirect(self, to):
         returnurl = self.request.get('returnurl')
@@ -104,7 +107,6 @@ class BaseHandler(webapp2.RequestHandler):
         self.user.put()
         self.session.add_flash(u'변경 사항을 저장하였습니다.', level='success')
         self.redirect(self.current_uri())
-
 
 class LoginRequiredHandler(BaseHandler):
     def initialize(self, *a, **kw):

@@ -13,6 +13,7 @@ from model import User, Proposal, UserState, UserToken
 from util import util
 import keys
 from basehandlers import BaseHandler, LoginRequiredHandler
+from library.firebase_token_generator import create_token
 import logging
 
 class MeetPage(LoginRequiredHandler):
@@ -97,22 +98,29 @@ class ShowProfile(LoginRequiredHandler):
 
 
 class Propose(LoginRequiredHandler):
-    pass
+    def post(self):
+        if self.user.state == UserState.SHOW_PROFILE:
+            pass
+
+        else:
+            self.abort(400)
 
 
 class TalkPage(LoginRequiredHandler):
     def get(self):
-        self.render('talk.html', user=self.user)
+        custom_data = {'username': self.user.username}
+        options = { 'debug': True }
+
+        token = create_token(keys.FIREBASE_SECRET, custom_data, options)
+
+        self.render('talk.html', user=self.user, firebase_token=token)
 
 
 class ProfilePage(LoginRequiredHandler):
     def get(self):
         first_login = self.session.pop('first_login', None)
 
-        flashes = self.session.get_flashes()
-        logging.info('flashes : ' + str(flashes))        
-        self.render('profile.html', user=self.user, 
-                                    flashes=flashes,
+        self.render('profile.html', user=self.user,
                                     first_login=first_login)
 
     def post(self):
@@ -129,8 +137,7 @@ class ProfilePage(LoginRequiredHandler):
 
 class AccountPage(LoginRequiredHandler):
     def get(self):
-        flashes = self.session.get_flashes()
-        self.render('account.html', user=self.user, flashes=flashes)
+        self.render('account.html', user=self.user)
 
     def post(self):
         name = self.request.get('name')
@@ -233,8 +240,10 @@ class Verify(BaseHandler):
             User.delete_signup_token(username, signup_token)
 
             user = User.get_by_id(username)
-            user.state = UserState.SHOW_ALL
-            user.update_state()
+            user.verified = True
+            user.put()
+
+            self.session.add_flash(u'짝짝짝! 인증이 완료되었습니다.', level='success')
 
             self.auth.set_session(self.auth.store.user_to_dict(user))
             self.redirect('/meet')
@@ -268,6 +277,8 @@ class TestPage(webapp2.RequestHandler):
     def get(self):
         for i in range(15):
             user = User.create_user(username='snudatetest' + str(i), raw_password='1234')
+            user.name = '김개똥' + str(i)
+            user.phone = '01012345678'
             user.nickname = '사용자' + str(i)
             user.tags = [u'예쁘고', u'착하고', u'똑똑한']
             user.profile = """
