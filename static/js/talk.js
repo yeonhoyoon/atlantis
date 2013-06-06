@@ -57,7 +57,7 @@ $('#write-talk-post').click(function (e) {
     nickname = '';
   }
   else {
-    alias = '';
+    alias = ''; //nickname is used
   }
 
   var username = $('#username').val();
@@ -67,11 +67,11 @@ $('#write-talk-post').click(function (e) {
 
 
   dataRef.child('talks').child(userTalkRef.name())
-                       .set({alias: alias,
-                             nickname: nickname, 
-                             content: content, 
-                             time: currentTime,
-                             '.priority': currentTime});
+                        .set({alias: alias,
+                              nickname: nickname, 
+                              content: content, 
+                              time: currentTime,
+                              '.priority': currentTime});
 
 
   $('#write-talk-content').val('');
