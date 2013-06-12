@@ -29,4 +29,30 @@ $(document).ready(function() {
 			$("#verification-email-sent-modal").modal();
 		});
 	}
-})
+});
+
+//UserVoice
+(function(){
+	var uv=document.createElement('script');
+	uv.type='text/javascript';
+	uv.async=true;
+	uv.src = 'http://widget.uservoice.com/uAOMxL0DtcC70Gd16y4Q.js';
+	var s=document.getElementsByTagName('script')[0];
+	s.parentNode.insertBefore(uv,s)})()
+
+UserVoice = window.UserVoice || [];
+function showClassicWidget() {
+  UserVoice.push(['showLightbox', 'classic_widget', {
+    mode: 'full',
+    primary_color: '#cc6d00',
+    link_color: '#007dbf',
+    default_mode: 'feedback',
+    forum_id: 203699,
+    support_tab_name: '1:1 문의',
+    feedback_tab_name: '제안합니다'
+  }]);
+}
+
+$("#feedback-link").click(function() {
+	showClassicWidget();
+});

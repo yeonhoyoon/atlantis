@@ -48,6 +48,21 @@ strong {
   margin-bottom: 0px;
 }
 
+/* base.html */
+a#feedback-link {
+  position: fixed;
+  bottom: 0;
+  right: 20px;
+  display: block;
+  overflow: hidden;
+  text-decoration: none;
+  color: #696969;
+}
+
+a#feedback-link:hover {
+  color: #333333;
+}
+
 /* meet.html */
 
 a.no-deco:hover {
