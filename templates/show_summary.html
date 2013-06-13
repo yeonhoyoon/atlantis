@@ -18,17 +18,16 @@
           </a>
       </div>
       <div class="row-fluid">
-        <span class="label label-default label-first">{{ selected_user.tags[0] }}</span>
-        <span class="label label-default label-second">{{ selected_user.tags[1] }}</span>
-        <span class="label label-default label-third">{{ selected_user.tags[2] }}</span>   
+        <span class="label label-first">{{ selected_user.tags[0] }}</span>
+        <span class="label label-second">{{ selected_user.tags[1] }}</span>
+        <span class="label label-third">{{ selected_user.tags[2] }}</span>   
       </div>
       <div class="row-fluid">
         <hr>        
       </div>
       {% for line in selected_user.profile_lines %}
         <div class="row-fluid">
-          <i class="icon-quote-left icon-2x pull-left icon-muted"></i>
-          {{ line }}
+          <blockquote>{{ line }}</blockquote>
         </div>
       {% endfor %}      
       <div class="row-fluid center-content">

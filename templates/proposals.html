@@ -1,0 +1,54 @@
+{% extends "meet.html" %}
+{% set active_tab = "/proposals" %}
+
+{% block title %}
+    만나요
+{% endblock %}
+
+{% block meet_content %}
+
+<div class="row-fluid" id="proposed-users">
+{% for proposed_user in proposed_users %}
+  {% if loop.index0 % 3 == 0 %}
+    <ul class="thumbnails no-margin-bottom">
+  {% endif %}
+    <li class="span4 user-card">
+      <div class="thumbnail">
+        <div class="row-fluid">
+          <strong>{{ proposed_user.nickname }}</strong>
+          <input class="profile-uuid" 
+                 type="hidden" value="{{ proposed_user.profile_uuid }}" />
+          <a class="no-deco">
+            <i class="icon-star icon-2x pull-right"></i></a>
+          </a>
+        </div>
+        <div class="row-fluid">
+          <span class="label label-first">{{ proposed_user.tags[0] or ' ' }}</span>
+          <span class="label label-second">{{ proposed_user.tags[1] or ' ' }}</span>
+          <span class="label label-third">{{ proposed_user.tags[2] or ' ' }}</span>
+        </div>
+        <div class="row-fluid">
+          <hr>        
+        </div>
+        {% for line in proposed_user.profile_lines %}
+          <div class="row-fluid">
+            <blockquote>{{ line }}</blockquote>
+          </div>
+        {% endfor %}      
+        <div class="row-fluid center-content">
+          <a class="btn btn-large btn-info show-profile" href="#">선택</a>  
+        </div>
+      </div>
+    </li>
+  {% if loop.index0 % 3 == 2 %}
+    </ul>
+  {% endif %}
+{% endfor %}
+</div>
+
+{% endblock %}
+{% block scripts %}
+  <script src="static/js/proposals.js"></script> 
+{% endblock %}
+
+<!-- <i class="icon-quote-left icon-2x pull-left icon-muted"></i> -->

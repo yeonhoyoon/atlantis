@@ -39,8 +39,6 @@ class UserToken(ndb.Model):
 
 
 class UserState:
-    NO_PERSONAL_INFO = 'NO_PERSONAL_INFO' 
-    NO_PROFILE = 'NO_PROFILE'
     SHOW_ALL = 'SHOW_ALL'
     SHOW_SUMMARY = 'SHOW_SUMMARY'
     SHOW_PROFILE = 'SHOW_PROFILE'
@@ -67,8 +65,7 @@ class User(ndb.Model):
     profile_uuid = ndb.StringProperty()
     
     state = ndb.StringProperty(default=UserState.SHOW_ALL,
-                               choices=set([UserState.NO_PERSONAL_INFO, UserState.NO_PROFILE,
-                                            UserState.SHOW_ALL, UserState.SHOW_SUMMARY, UserState.SHOW_PROFILE,
+                               choices=set([UserState.SHOW_ALL, UserState.SHOW_SUMMARY, UserState.SHOW_PROFILE,
                                             UserState.PROPOSED, UserState.MATCHED, UserState.COUPLED]))
     state_changed = ndb.DateTimeProperty(required=True, auto_now_add=True)
     selected_profile_uuids = ndb.StringProperty(repeated=True)
@@ -103,7 +100,6 @@ class User(ndb.Model):
     def get_by_auth_token(cls, username, token):
         token_key = UserToken.get_key(username, 'auth', token)
         user_key = ndb.Key(cls, username)
-        # Use get_multi() to save a RPC call.
         valid_token, user = ndb.get_multi([token_key, user_key])
         if valid_token and user:
             timestamp = int(time.mktime(valid_token.created.timetuple()))
@@ -154,18 +150,35 @@ class User(ndb.Model):
         self.state = new_state
         self.state_changed = datetime.now()
 
-    def _pre_put_hook(self):
-        if not (self.name and self.phone):
-            self.set_state(UserState.NO_PERSONAL_INFO)
-        elif not (self.nickname and self.profile and not self.profile.isspace()):
-            self.set_state(UserState.NO_PROFILE)
-        elif self.state in [UserState.NO_PERSONAL_INFO, UserState.NO_PROFILE]:
-            self.set_state(UserState.SHOW_ALL)
+    def has_personal_info(self):
+        return self.name and self.phone
+
+    def has_profile(self):
+        return self.nickname and self.profile and not self.profile.isspace()
+
+    def get_selected_user(self):
+        selected_users = list(User.by_profile_uuids(self.selected_profile_uuids))
+        if selected_users:
+            return selected_users[0]
+
+    def get_current_proposal(self):
+        q = Proposal.query().filter(Proposal.is_active == True)
+        q = q.filter(Proposal.from_user == self.key).order(-Proposal.created)
+        proposal = q.fetch(1)
+        return proposal[0] if proposal else None
+
+    def get_proposed_users(self):
+        q = Proposal.query().filter(Proposal.is_active == True) 
+        q = q.filter(Proposal.to_user == self.key)
+        from_user_keys = [p.from_user for p in q.fetch(projection=["from_user"])]
+        from_users = User.query().filter(User.key.IN(from_user_keys))
+
+        return from_users
 
 
 class Proposal(ndb.Model):
     from_user = ndb.KeyProperty(kind=User, required=True)
     to_user = ndb.KeyProperty(kind=User, required=True)
-    created = ndb.DateTimeProperty(required=True)
-    is_active = ndb.BooleanProperty(required=True)
-    is_accepted = ndb.BooleanProperty(required=True)
+    created = ndb.DateTimeProperty(required=True, auto_now_add=True)
+    is_active = ndb.BooleanProperty(default=True)
+    is_accepted = ndb.BooleanProperty(default=False)

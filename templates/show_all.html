@@ -14,7 +14,7 @@
   <div class="span12">
     <span class="h3">남은 선택 : <span class="number">3</span> </span>
     <button id="show-summary" 
-            class="btn btn-large btn-success pull-right" href="#">선택 완료</button>
+            class="btn btn-large btn-info pull-right" href="#">선택 완료</button>
   </div>
 </div>
 <ul class="thumbnails no-margin-bottom" id="selected-users">
@@ -55,9 +55,9 @@
       			</a>
       	</div>
       	<div class="row-fluid">
-  		    <span class="label label-default label-first">{{ other_user.tags[0] or ' ' }}</span>
-  		    <span class="label label-default label-second">{{ other_user.tags[1] or ' ' }}</span>
-  		    <span class="label label-default label-third">{{ other_user.tags[2] or ' ' }}</span>
+  		    <span class="label label-first">{{ other_user.tags[0] or ' ' }}</span>
+  		    <span class="label label-second">{{ other_user.tags[1] or ' ' }}</span>
+  		    <span class="label label-third">{{ other_user.tags[2] or ' ' }}</span>
       	</div>
       </div>
     </li>

@@ -1,9 +1,36 @@
 /*background pattern*/
 @media only screen {
   body {
-    background-image: url(../img/cork.png);
+    background-image: url(../img/cream_pixels.png);
     background-repeat: repeat;
   }
+}
+
+html, body {
+  height: 100%;
+}
+
+#wrapper {
+  min-height: 100%;
+}
+
+#wrapper > .container {
+  padding-bottom: 40px;
+}
+
+@media (min-width: 979px) {
+  #wrapper > .container {
+    padding-top: 60px;
+  }  
+}
+
+#footer {
+  height: 60px;
+  margin-top: -60px;
+}
+
+#footer > a {
+  color: #999999;
 }
 
 body {
@@ -46,6 +73,10 @@ strong {
 .navbar-form .input-append,
 .navbar-form .input-prepend {
   margin-bottom: 0px;
+}
+
+input.appended-input {
+  width:52%
 }
 
 /* base.html */

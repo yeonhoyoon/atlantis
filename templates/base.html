@@ -1,3 +1,15 @@
+{% set navigation_bar_left = [
+    ('/meet', '만나요'),
+    ('/talk', '얘기해요')
+] %}
+{% set navigation_bar_right = [
+    ('/profile', '내 프로필'),
+    ('/account', '설정'),
+    ('/logout', '로그아웃')
+] %}
+{% set active_page = active_page %}
+
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -17,14 +29,8 @@
     </script>
     <link rel="stylesheet" href="static/css/bootstrap.min.css">
     <link rel="stylesheet" href="static/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="static/css/base.css">
-    <style>
-      body {
-        padding-top: 60px;
-        padding-bottom: 40px;
-      }
-    </style>
     <link rel="stylesheet" href="static/css/bootstrap-responsive.min.css">
+    <link rel="stylesheet" type="text/css" href="static/css/base.css">
     {% if user %}
       <meta name="_xsrf_token" content="{{ xsrf_token }}">
     {% endif %}
@@ -44,96 +50,95 @@
     </script>
   </head>
   <body>
+  <div id="wrapper">
     <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container">
-          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="brand" href="/">스누데이트</a>
-          <div class="nav-collapse collapse">
-            <ul class="nav">
-              <li><a href="meet">만나요</a></li>
-              <li><a href="talk">얘기해요</a></li>
-            </ul>
-            <ul class="nav pull-right">
-              {% if user %}
-                <li><a href="profile">내 프로필</a></li>
-                <li><a href="account">설정</a></li>
-                <li><a href="logout">로그아웃</a></li>
-                </li>
-              {% else %}
-                {% block login_control %}
-                  <form class="navbar-form pull-right" method="post" action="/login">
-                    <div class="input-append">
-                      <input class="span2" type="text" placeholder="이메일"
-                             name="username">
-                      <span class="add-on">@snu.ac.kr</span>
-                    </div>
-                    <input class="span2" type="password" placeholder="비밀번호"
-                           name="password">
-                    <button type="submit" class="btn btn-inverse">로그인</button>
-                  </form>
-                {% endblock %}
-              {% endif %}
-            </ul>
+        <div class="navbar-inner">
+          <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/">스누데이트</a>
+            <div class="nav-collapse collapse">
+              <ul class="nav">
+                {% for href, caption in navigation_bar_left %}
+                  <li {% if href == active_page %} class="active" {% endif %}>
+                    <a href="{{ href }}">{{ caption }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+              <ul class="nav pull-right">
+                {% if user %}
+                  {% for href, caption in navigation_bar_right %}
+                    <li {% if href == active_page %} class="active" {% endif %}>
+                      <a href="{{ href }}">{{ caption }}</a>
+                    </li>
+                  {% endfor %}
+                {% endif %}
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
     </div>    
     <div class="container">
-      {% if user and not user.verified %}
-        <div class="alert">
-          <i class="icon-envelope"></i>
-          <span>{{ user.username }}@snu.ac.kr로 전송된 메일을 확인해 가입 절차를 완료해 주세요.</span>
-          <a href="http://my.snu.ac.kr" target="_blank">메일 확인</a>
-          <a id="send-verification-email" class="pull-right" href="#">인증 메일 재전송</a>            
-        </div>  
-        <div id="verification-email-sent-modal" 
-             class="modal hide fade" tabindex="-1" role="dialog" 
-             aria-labelledby="myModalLabel" aria-hidden="true">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 id="myModalLabel">인증 메일 전송</h3>
-          </div>
-          <div class="modal-body">
-            <p>{{ user.username }}@snu.ac.kr로 인증 메일을 전송하였습니다.</p>
-            <p>메일 안에 있는 링크를 클릭하여 메일 주소를 인증해 주세요.</p>
-          </div>
-          <div class="modal-footer">
-            <a class="pull-left" href="http://my.snu.ac.kr" target="_blank">메일 확인</a>
-            <a class="btn btn-info" data-dismiss="modal" aria-hidden="true">확인</a>
-          </div>
-        </div>
-      {% endif %}
-      {% for flash in flashes %}
-        {% if flash[1] == 'success' %}
-          <div class="alert alert-success">
-        {% elif flash[1] == 'info' %}
-          <div class="alert alert-info">
-        {% else %}
+        {% if user and not user.verified %}
           <div class="alert">
-        {% endif %}
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-          {{ flash[0] }}
+            <i class="icon-envelope"></i>
+            <span>{{ user.username }}@snu.ac.kr로 전송된 메일을 확인해 가입 절차를 완료해 주세요.</span>
+            <a href="http://my.snu.ac.kr" target="_blank">메일 확인</a>
+            <a id="send-verification-email" class="pull-right" href="#">인증 메일 재전송</a>            
+          </div>  
+          <div id="verification-email-sent-modal" 
+               class="modal hide fade" tabindex="-1" role="dialog" 
+               aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+              <h3 id="myModalLabel">인증 메일 전송</h3>
+            </div>
+            <div class="modal-body">
+              <p>{{ user.username }}@snu.ac.kr로 인증 메일을 전송하였습니다.</p>
+              <p>메일 안에 있는 링크를 클릭하여 메일 주소를 인증해 주세요.</p>
+            </div>
+            <div class="modal-footer">
+              <a class="pull-left" href="http://my.snu.ac.kr" target="_blank">메일 확인</a>
+              <a class="btn btn-info" data-dismiss="modal" aria-hidden="true">확인</a>
+            </div>
           </div>
-      {% endfor %}
-      {% block content %}
-        
-      {% endblock %}
+        {% endif %}
+        {% for flash in flashes %}
+          {% if flash[1] == 'success' %}
+            <div class="alert alert-success">
+          {% elif flash[1] == 'info' %}
+            <div class="alert alert-info">
+          {% else %}
+            <div class="alert">
+          {% endif %}
+              <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {{ flash[0] }}
+            </div>
+        {% endfor %}
+        {% block content %}
+          
+        {% endblock %}
     </div>    
     <a id="feedback-link" href="#">
-      <i class="icon-question-sign icon-3x hidden-phone"></i>
-      <i class="icon-question-sign icon-2x visible-phone"></i>
-    </a>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script src="static/js/bootstrap.min.js"></script>
-    <script src="static/js/bootstrapx-clickover.js"></script>
-    <script src="static/js/base.js"></script>
-    {% block scripts %}
-      
-    {% endblock %}       
+        <i class="icon-question-sign icon-3x hidden-phone"></i>
+        <i class="icon-question-sign icon-2x visible-phone"></i>
+      </a>
+      <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+      <script src="static/js/bootstrap.min.js"></script>
+      <script src="static/js/bootstrapx-clickover.js"></script>
+      <script src="static/js/base.js"></script>
+      {% block scripts %}
+        
+      {% endblock %}   
+    </div>
+  </div>    
+  <div id="footer" class="container text-center">
+  {% block footer %}
+    
+  {% endblock %}
+  </div>
   </body>
 </html>

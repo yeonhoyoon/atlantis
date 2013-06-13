@@ -23,11 +23,11 @@ class MeetPage(LoginRequiredHandler):
         if not self.user.verified:
             self.write('Account Not Authorized')
 
-        elif state == UserState.NO_PERSONAL_INFO or not self.user.active:
+        elif not self.user.has_personal_info():
             self.session.add_flash(u'먼저 기본정보를 작성해 주세요.', level='info')
             self.redirect('/account')
 
-        elif state == UserState.NO_PROFILE:
+        elif not self.user.has_profile():
             self.session.add_flash(u'먼저 프로필을 작성해 주세요.', level='info')
             self.redirect('/profile')
 
@@ -35,7 +35,7 @@ class MeetPage(LoginRequiredHandler):
             recent_users = User.get_recent_users()
             other_users = filter(lambda u: u.username != self.user.username, recent_users)
 
-            self.render('show_all.html', other_users=other_users, user=self.user)
+            self.render('show_all.html', other_users=other_users)
 
         elif state == UserState.SHOW_SUMMARY:
             selected_users = list(User.by_profile_uuids(self.user.selected_profile_uuids))
@@ -43,19 +43,36 @@ class MeetPage(LoginRequiredHandler):
             for user in selected_users:
                 user.profile_lines = user.get_random_profile_lines()
 
-            self.render('show_summary.html', selected_users=selected_users, user=self.user)
+            self.render('show_summary.html', selected_users=selected_users)
 
         elif state == UserState.SHOW_PROFILE:
-            selected_users = list(User.by_profile_uuids(self.user.selected_profile_uuids))
+            other_user = self.user.get_selected_user()
 
-            if selected_users:
-                self.render('show_profile.html', other_user=selected_users[0], user=self.user)
-
+            if other_user:
+                self.render('show_profile.html', other_user=other_user)
             else:
-                self.write('profile has changed, and is not present anymore')
+                self.write('profile has changed')
+
+        elif state == UserState.PROPOSED:
+            proposal = self.user.get_current_proposal()
+
+            if proposal:
+                other_user = proposal.to_user.get()
+                self.render('show_profile.html', other_user=other_user, proposed=True)
+            else:
+                self.write('profile has changed')
 
         else:
             self.abort(400)
+
+
+class ProposalsPage(LoginRequiredHandler):
+    def get(self):
+        proposed_users = self.user.get_proposed_users()
+        for user in proposed_users:
+            user.profile_lines = user.get_random_profile_lines()
+
+        self.render('proposals.html', proposed_users=proposed_users)
 
 
 class ShowSummary(LoginRequiredHandler):
@@ -100,7 +117,14 @@ class ShowProfile(LoginRequiredHandler):
 class Propose(LoginRequiredHandler):
     def post(self):
         if self.user.state == UserState.SHOW_PROFILE:
-            pass
+            selected_users = list(User.by_profile_uuids(self.user.selected_profile_uuids))
+            other_user = selected_users[0]
+
+            proposal = Proposal(from_user=self.user.key, to_user=other_user.key)
+            proposal.put()
+
+            self.user.set_state(UserState.PROPOSED)
+            self.user.put()
 
         else:
             self.abort(400)
@@ -109,7 +133,8 @@ class Propose(LoginRequiredHandler):
 class TalkPage(LoginRequiredHandler):
     def get(self):
         custom_data = {'username': self.user.username}
-        options = { 'debug': True }
+        options = {}
+        #options = { 'debug': True }
 
         token = create_token(keys.FIREBASE_SECRET, custom_data, options)
 
@@ -171,10 +196,16 @@ class MainPage(BaseHandler):
         if self.logged_in:
             self.redirect('/meet')
         else:
+            self.render('login.html')
+
+
+class SignupPage(BaseHandler):
+    def get(self):
+        if self.logged_in:
+            self.redirect('/meet')
+        else:
             self.render('signup.html')
 
-
-class CreateAccount(BaseHandler):
     def post(self):
         username = self.request.get('username')
         password = self.request.get('password')
@@ -253,14 +284,14 @@ class Verify(BaseHandler):
 
 class LoginPage(BaseHandler):
     def get(self):
-        self.render('/login.html')
+        self.render('/login.html', returnurl=self.request.get('returnurl'))
 
     def post(self):
         username = self.request.get('username')
         password = self.request.get('password')
 
         try:
-            user = self.auth.get_user_by_password(username, password, save_session=True)
+            user = self.auth.get_user_by_password(username, password, save_session=True, remember=True)
             self.return_or_redirect('/')
 
         except (InvalidAuthIdError, InvalidPasswordError) as e:

@@ -7,9 +7,10 @@ import webapp2
 import jinja2
 from webapp2_extras import sessions
 from model import User, Proposal, UserState
-from handlers import (MainPage, MeetPage, ShowSummary, ShowProfile, 
+from handlers import (MainPage, MeetPage, ShowSummary, ShowProfile,
+                      ProposalsPage, 
                       Propose, TalkPage, ProfilePage, AccountPage, 
-                      TestPage, LoginPage, LogoutPage, CreateAccount, 
+                      TestPage, LoginPage, LogoutPage, SignupPage, 
                       SendVerificationEmail, Verify)
 import keys
 from util import util, xsrf
@@ -28,13 +29,14 @@ config = {
 }
 
 app = webapp2.WSGIApplication([('/', MainPage),
-   webapp2.Route('/create_account', CreateAccount, name='CreateAccount'),
+   webapp2.Route('/signup', SignupPage, name='SignupPage'),
    webapp2.Route('/send_verification_email', SendVerificationEmail, 
                  name='SendVerificationEmail'),
    webapp2.Route('/verify/<encoded_username:.+>-<signup_token:.+>', Verify, name='Verify'),
    webapp2.Route('/meet', MeetPage, name='MeetPage'),
    webapp2.Route('/meet/show_summary', ShowSummary, name='ShowSummary'),
    webapp2.Route('/meet/show_profile', ShowProfile, name='ShowProfile'),
+   webapp2.Route('/proposals', ProposalsPage, name='ProposalsPage'),
    webapp2.Route('/meet/propose', Propose, name='Propose'),
    webapp2.Route('/talk', TalkPage, name='TalkPage'),
    webapp2.Route('/profile', ProfilePage, name='ProfilePage'),

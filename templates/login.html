@@ -4,9 +4,6 @@
     로그인
 {% endblock %}
 
-{% block login_control %}
-{% endblock %}
-
 {% block content %}
 {% if login_error %}
 <div class="alert alert-error">
@@ -14,22 +11,37 @@
   아이디 또는 비밀번호를 다시 확인해 주세요.
 </div>
 {% endif %}
-<form class="form-horizontal" method="post">
+<form class="form-horizontal" method="post" action="/login">
   <legend>로그인</legend>
   <div class="control-group">
     <div class="input-append">
-      <input class="span2" type="text" name="username" placeholder="이메일">
+      <input class="appended-input" type="text" name="username" placeholder="이메일">
       <span class="add-on">@snu.ac.kr</span>
     </div>
   </div>
   <div class="control-group">
       <input type="password" name="password" placeholder="비밀번호">
   </div>
+  <input type="hidden" name="returnurl" value="{{ returnurl }}">
   <div class="control-group">
-      <button type="submit" class="btn btn-success">로그인</button>
+      <button type="submit" class="btn btn-info">로그인</button>
   </div>
 </form>
-<div class="row-fluid">
-  <span><a href="/">가입하기</a> | <a href="">비밀번호 찾기</a></span>
+<hr>
+<div class="control-group">
+  <a class="btn btn-success" href="signup">가입하기</a>
 </div>
+<!-- <div class="control-group">
+  <a href="">비밀번호를 잊으셨나요?</a>
+</div> -->
+{% endblock %}
+{% block footer %}
+  <a href="http://twitter.github.io/bootstrap/">Bootstrap</a>
+  <span class="hidden-phone">·</span>
+  <br class="visible-phone">
+  <a href="http://fortawesome.github.io/Font-Awesome/">Font Awesome</a>
+  <br class="visible-phone">
+  <span class="hidden-phone">·</span>
+  <a href="http://subtlepatterns.com"> Subtle Patterns</a>
+  
 {% endblock %}

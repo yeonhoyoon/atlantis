@@ -1,13 +1,28 @@
 {% extends "base.html" %}
 
+{% set active_page= "/meet" %}
+
+{% set tabs = [
+    ('/meet', '나의 선택'),
+    ('/proposals', '내가 받은 선택')
+] %}
+{% set active_tab= active_tab | default('/meet') %}
+
 {% block content %}
 	<div class="row-fluid">
 	<div class="span2">
-	  <ul class="nav nav-tabs nav-stacked">
-	    <li class="active">
-	    <a href="#">나의 선택</a>
-		  </li>
-		  <li><a href="#">내가 받은 선택</a></li>
+	  <ul class="nav nav-pills nav-stacked">
+	  	{% for href, caption in tabs %}
+				{% if href == active_tab %}
+					<li class="active">
+						<a href="{{ href }}">{{ caption }}</a>
+					</li>
+				{% else %}
+					<li>
+						<a href="{{ href }}">{{ caption }}</a>
+					</li>
+				{% endif %}
+	  	{% endfor %}
 	  </ul>
 	</div>
 	<div class="span10">
