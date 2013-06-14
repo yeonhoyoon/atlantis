@@ -234,8 +234,7 @@ hr.thick {
   border: none;
 }
 
-.vertical-margin10 {
-  margin-top: 10px;
+.bottom-margin10 {
   margin-bottom: 10px;
 }
 
@@ -243,21 +242,6 @@ div.center-content {
   text-align: center; 
   margin-top: 15px;
   margin-bottom: 5px;
-}
-
-.center100 {
-  max-width: 100px;
-  margin: 0 auto;
-}
-
-.center300 {
-  max-width: 300px;
-  margin: 0 auto;
-}
-
-.center450 {
-  max-width: 450px;
-  margin: 0 auto;
 }
 
 .center600 {

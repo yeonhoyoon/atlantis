@@ -5,37 +5,51 @@
 {% endblock %}
 
 {% block meet_content %}
-<div id="show-profile-body" class="center600">
-  <div class="thumbnail">
-    <div class="row-fluid">
-        <strong>{{ other_user.nickname }}</strong>
-        <input class="profile-uuid" 
-               type="hidden" value="{{ other_user.profile_uuid }}" />
-        <a class="no-deco">
-          {% if proposed %}
-            <i class="icon-heart icon-2x pull-right"></i>
-          {% else %}
-            <i class="icon-star icon-2x pull-right"></i>
-          {% endif %}
-        </a>
+<div class="row">
+  <div id="show-profile-body" class="span8 offset2">
+    <div class="thumbnail">
+      <div class="row-fluid">
+          <strong>{{ other_user.nickname }}</strong>
+          <input class="profile-uuid" 
+                 type="hidden" value="{{ other_user.profile_uuid }}" />
+          <a class="no-deco">
+            {% if proposed %}
+              <i class="icon-heart icon-2x pull-right"></i>
+            {% else %}
+              <i class="icon-star icon-2x pull-right"></i>
+            {% endif %}
+          </a>
+      </div>
+      <div class="row-fluid">
+          <span class="label label-first">{{ other_user.tags[0] }}</span>
+          <span class="label label-second">{{ other_user.tags[1] }}</span>
+          <span class="label label-third">{{ other_user.tags[2] }}</span>
+          <span class="label pull-right">{{ other_user.nickname }} : 확인 전</span>
+      </div>
+      <div class="row-fluid">
+        <hr>        
+      </div>
+      <div class="row-fluid">
+        <span class="data">{{ other_user.profile }}</span>
+      </div>
+      <div class="row-fluid center-content">
+        {% if not proposed %}
+          <a id="propose" class="btn btn-large btn-info" 
+           href="javascript:;">최종선택<i class="icon-star"></i></a>
+        {% endif %}      
+      </div>
     </div>
+  </div>
+</div>
+<div id="comments" class="row">
+  <div class="talk span8 offset2">
     <div class="row-fluid">
-        <span class="label label-first">{{ other_user.tags[0] }}</span>
-        <span class="label label-second">{{ other_user.tags[1] }}</span>
-        <span class="label label-third">{{ other_user.tags[2] }}</span>
-        <span class="label pull-right">{{ other_user.nickname }} : 확인 전</span>
+      <strong class="talk-name">name</strong>
+      <i class="icon-ok-circle text-success"></i>
+      <a class="talk-time pull-right no-deco muted" title="">time</a>
     </div>
-    <div class="row-fluid">
-      <hr>        
-    </div>
-    <div class="row-fluid">
-      <span class="data">{{ other_user.profile }}</span>
-    </div>
-    <div class="row-fluid center-content">
-      {% if not proposed %}
-        <a id="propose" class="btn btn-large btn-info" 
-         href="javascript:;">선택<i class="icon-heart"></i></a> 
-      {% endif %}      
+    <div class="row-fluid talk-content-container">
+      <span class="talk-content data">content</span>
     </div>
   </div>
 </div>

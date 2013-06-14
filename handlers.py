@@ -54,13 +54,14 @@ class MeetPage(LoginRequiredHandler):
                 self.write('profile has changed')
 
         elif state == UserState.PROPOSED:
-            proposal = self.user.get_current_proposal()
+            other_user_key_id = self.session.get('propose_to_user_key') or \
+                             self.user.get_proposed_to_user_key()
 
-            if proposal:
-                other_user = proposal.to_user.get()
-                self.render('show_profile.html', other_user=other_user, proposed=True)
+            if other_user_key_id:
+                self.render('show_profile.html', other_user=User.get_by_id(other_user_key_id), 
+                                                 proposed=True)
             else:
-                self.write('profile has changed')
+                self.write('no proposal exists')
 
         else:
             self.abort(400)
@@ -101,19 +102,6 @@ class ShowProfile(LoginRequiredHandler):
             self.abort(400)
 
 
-class ShowProfile(LoginRequiredHandler):
-    def post(self):
-        selected_profile_uuid = self.request.get('profile_uuid')
-        
-        if self.user.state == UserState.SHOW_SUMMARY and selected_profile_uuid:
-            self.user.state = UserState.SHOW_PROFILE
-            self.user.selected_profile_uuids = [selected_profile_uuid]
-            self.user.put()
-            self.write('success')
-        else:
-            self.abort(400)
-
-
 class Propose(LoginRequiredHandler):
     def post(self):
         if self.user.state == UserState.SHOW_PROFILE:
@@ -125,6 +113,8 @@ class Propose(LoginRequiredHandler):
 
             self.user.set_state(UserState.PROPOSED)
             self.user.put()
+
+            self.session['propose_to_user_key'] = other_user.key.id()
 
         else:
             self.abort(400)

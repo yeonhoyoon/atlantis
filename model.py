@@ -161,11 +161,15 @@ class User(ndb.Model):
         if selected_users:
             return selected_users[0]
 
-    def get_current_proposal(self):
+    def get_proposed_to_user_key_id(self):
         q = Proposal.query().filter(Proposal.is_active == True)
         q = q.filter(Proposal.from_user == self.key).order(-Proposal.created)
         proposal = q.fetch(1)
-        return proposal[0] if proposal else None
+
+        if proposal:
+            return proposal[0].to_user.id()
+        else:
+            return None
 
     def get_proposed_users(self):
         q = Proposal.query().filter(Proposal.is_active == True) 

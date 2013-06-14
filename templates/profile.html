@@ -7,7 +7,8 @@
 {% endblock %}
 
 {% block content %}
-  <form class="center600" method="post">
+<div class="row">
+  <form class="span6 offset3" method="post">
     <input name=_xsrf_token type=hidden value="{{ xsrf_token }}">
     <h3>내 프로필</h3>
     <hr class="thick">
@@ -40,6 +41,7 @@
               name="change_account" value="change_account">저장하기</button>
     </div>
   </form>
+</div>
   {% if first_login %}
     <div id="first_login"></div>
   {% endif %}
