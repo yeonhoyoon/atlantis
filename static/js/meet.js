@@ -15,14 +15,13 @@ $(".user-card a.select").click(function() {
 		var selectedCard = currentCard.clone(true)
 																	.insertBefore(".unknown-card:first").hide();
 		
-		selectedCard.show(0, refreshRemainingChoices);
+		selectedCard.show(0);
 	} 
 	else {
 		var selectedCard = getSelectedCard(profile_uuid);
 		selectedCard.hide(0, function () {
 			selectedCard.remove();
 			$("#selected-users .unknown-card:hidden:last").show();
-			refreshRemainingChoices();
 		});
 		var matchingUserCard = getUserCardFromUserCardpool(profile_uuid);
 		styleUnselect(matchingUserCard);
@@ -37,9 +36,13 @@ $("#show-summary").click(function (event) {
 	var selected_profile_uuids = $("#selected-users .user-card .profile-uuid")
 																	.map(function() { return this.value }).get(); 
 
-	if(selected_profile_uuids.length == 0)
+	if(selected_profile_uuids.length == 0) {
+		var firstCard = $(".unknown-card:first-child").find("a");
+		firstCard.clickover('show');
+		setTimeout(function() {firstCard.clickover('hide')}, 3*1000);
 		return;
-
+	}
+	
 	$.post('/meet/show_summary', 
 		{ selected_profile_uuids: selected_profile_uuids }, 
 		function(data) {
@@ -72,10 +75,6 @@ var profile_uuid = $("#show-profile-body").find(".profile-uuid").attr("value");
 });
 
 $(".unknown-card a[rel=clickover]").clickover({ placement: 'bottom' });
-
-function refreshRemainingChoices() {
-	$("#remaining-choices .number").text(3 - getSelectedUserCount());	
-}
 
 function getUserCardFromUserCardpool(profile_uuid) {
 	return $("#user-pool .user-card").has(".profile-uuid[value=" + profile_uuid + "]");

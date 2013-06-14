@@ -16,41 +16,47 @@
 <input id="username" type="hidden" value="{{ user.username or '' }}">
 
 <div class="row">
-	<div class="row">
-		<div id="write-talk" class="center300">
-			<div id="write-talk-controls" class="row-fluid">
-				<input id="write-talk-name" class="no-margin-bottom input-small" type="text"
-							 placeholder="{{ user.nickname or '' }}"
-							 value="{{ user.nickname or '' }}">
-				<button id="write-talk-post" 
-								class="btn pull-right" style="width:27%;">
-								<i class="icon-arrow-right"></i>
-				</button>	
-			</div>
-			<textarea id="write-talk-content" style="width:290px" rows="3" 
-								placeholder="무슨 생각 중이세요?"></textarea>							
-			<hr class="thick">
-			<div id="spinner" class="text-center">
-				<i class="icon-spinner icon-spin icon-3x"></i>			
-			</div>
+	<div id="write-talk" class="span6 offset3">
+		<div id="write-talk-controls" class="row-fluid">
+			<input id="write-talk-name" class="no-margin-bottom input-small" type="text"
+						 placeholder="{{ user.nickname or '' }}"
+						 value="{{ user.nickname or '' }}">
+			<button id="write-talk-post" 
+							class="btn pull-right input-small">
+							<i class="icon-pencil"></i>
+			</button>	
 		</div>
+		<textarea id="write-talk-content" class="span6" rows="3" 
+							placeholder="무슨 생각 중이세요?"></textarea>							
+		<hr class="thick">
 	</div>
 </div>
 <div id="talks" class="row">
 </div>
-
-<div id="talk-template" class="row hide">
-	<div class="talk center300">
-		<div class="row-fluid">
-			<strong class="talk-name">name</strong>
-			<i class="icon-ok-circle text-success"></i>
-			<span class="talk-time pull-right">time</span>
-		</div>
-		<div class="row-fluid">
-			<span class="talk-content data">content</span>
-		</div>
+<div id="spinner" class="text-center">
+	<i class="icon-spinner icon-spin icon-3x"></i>			
+</div>
+<div class="text-center">
+	<a id="load-more-talks" class="darklink hide" href="javascript:;" title="More!">
+		<i class="icon-circle-arrow-down icon-3x"></i>
+	</a>
+</div>
+<div class="row">
+	<div id="no-more-talks" class="well span6 offset3 hide">
+	  여기까지가 끝인가보오.
 	</div>
-</div>	
+</div>
+
+<div id="talk-template" class="talk span6 offset3 hide">
+	<div class="row-fluid">
+		<strong class="talk-name">name</strong>
+		<i class="icon-ok-circle text-success"></i>
+		<a class="talk-time pull-right no-deco muted" title="">time</a>
+	</div>
+	<div class="row-fluid talk-content-container">
+		<span class="talk-content data">content</span>
+	</div>
+</div>
 {% endblock %}
 
 {% block scripts %}

@@ -7,6 +7,11 @@
 
 {% block meet_content %}
 
+{% if not proposed_users %}
+<div class="alert alert-info">
+  받은 선택이 없습니다.
+</div>
+{% endif %}
 <div class="row-fluid" id="proposed-users">
 {% for proposed_user in proposed_users %}
   {% if loop.index0 % 3 == 0 %}
@@ -36,7 +41,7 @@
           </div>
         {% endfor %}      
         <div class="row-fluid center-content">
-          <a class="btn btn-large btn-info show-profile" href="#">선택</a>  
+          <a class="btn btn-large btn-info show-profile" href="javascript:;">선택</a>  
         </div>
       </div>
     </li>
@@ -48,7 +53,8 @@
 
 {% endblock %}
 {% block scripts %}
-  <script src="static/js/proposals.js"></script> 
+  <script src="static/js/jquery.wookmark.min.js"></script>
+  <script src="static/js/proposals.js"></script>
 {% endblock %}
 
 <!-- <i class="icon-quote-left icon-2x pull-left icon-muted"></i> -->

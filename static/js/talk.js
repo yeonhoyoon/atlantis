@@ -1,49 +1,59 @@
+moment.lang('ko');
 $('#write-talk textarea').autogrow();
 
 var dataRef = new Firebase('https://snudate.firebaseIO.com/');
 
-var oldDataQuery = dataRef.child('talks').limit(10);
-var newDataQuery = dataRef.child('talks').startAt(new Date().getTime());
+var oldDataQuery = dataRef.child('talks').limit(3);
+var newDataQuery = dataRef.child('talks').startAt(new Date().valueOf());
 
 dataRef.auth($("#firebase_token").val());
 
 oldDataQuery.once('value', function (snapshot) {
-  $('#spinner').hide();
+  changeLoadingState(false);
 
   snapshot.forEach(function (child) {
-    var talk = child.val();
-    displayTalkMessage(talk, false);
+    var data = child.val();
+
+    displayTalk(data, function(talk) {
+      $('#talks').prepend(talk);
+    });
   });
 });
 
 newDataQuery.on('child_added', function (child) {
-  var talk = child.val();
-  displayTalkMessage(talk, true);
+  var data = child.val();
+
+  displayTalk(data, function(talk) {
+    $('#talks').prepend(talk);
+  });
 });
 
-function displayTalkMessage(talk, isSlow) {
+function displayTalk(talk, position) {
   var template = $('#talk-template').clone();
   $(template).removeAttr("id");
   if(talk.alias) {
     $(template).find('.talk-name').text(talk.alias);
     $(template).find('.icon-ok-circle').hide();
-  }
-  else {
+  } else {
     $(template).find('.talk-name').text(talk.nickname);    
   }
 
   $(template).find('.talk-content').text(talk.content);
-  $(template).find('.talk-time').text(moment(talk.time).format('h:mm:ss a'));
+  $(template).find('.talk-time')
+             .attr('title', moment(talk.time).format('YYYY-MM-DD HH:mm:ss'))
+             .text(getDisplayTime(talk.time));
 
-  $('#talks').prepend(template);
-
-  if (isSlow) {
-    template.show('slow');
-  }
-  else {
-    template.show();
-  }
+  position(template);
+  template.fadeIn();
 };
+
+function getDisplayTime(time) {
+  if(moment(time).isBefore(moment().subtract('days', 1))) {
+    return moment(time).calendar();
+  } else {
+    return moment(time).fromNow();
+  }
+}
 
 $('#write-talk-post').click(function (e) {
   var nickname = $('#nickname').val();
@@ -55,8 +65,7 @@ $('#write-talk-post').click(function (e) {
 
   if(alias != '' && alias != nickname) { //alias is used.
     nickname = '';
-  }
-  else {
+  } else {
     alias = ''; //nickname is used
   }
 
@@ -76,3 +85,47 @@ $('#write-talk-post').click(function (e) {
 
   $('#write-talk-content').val('');
 });
+
+$("#load-more-talks").click(function (e) {
+  changeLoadingState(true);
+
+  var lastTalk = $('#talks .talk:last-child');
+  var lastTime = lastTalk.find(' .talk-time').attr('title');
+
+  var moreDataQuery = dataRef.child('talks').endAt(moment(lastTime).valueOf()).limit(3);
+  moreDataQuery.once('value', function(snapshot) {
+    snapshot.forEach(function (child) {
+      var data = child.val();
+
+      displayTalk(data, function(talk) {
+        talk.insertAfter(lastTalk);
+      });
+    });
+
+    changeLoadingState(false);
+
+    if (!snapshot.hasChildren()) {
+      $("#load-more-talks").hide();
+      $("#no-more-talks").show();
+    }
+  });
+});
+
+function changeLoadingState(isLoading) {
+  if (isLoading) {
+    $('#spinner').show();
+    $('#load-more-talks').hide();
+  } else {
+    $('#spinner').hide();
+    $('#load-more-talks').show();
+  }
+}
+
+setInterval(function() {
+  $("#talks .talk-time").each(function () {
+    var time = $(this).attr('title');
+    if (time !== undefined) {
+      $(this).text(getDisplayTime(time));  
+    }    
+  });
+}, 60 * 1000)

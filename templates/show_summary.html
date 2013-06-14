@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block meet_content %}
+<h3>가장 마음에 드는 한명을 선택해 주세요.</h3>
 <ul class="thumbnails" id="selected-users">
 	{% for selected_user in selected_users %}
 <li class="span4 user-card">
@@ -31,7 +32,7 @@
         </div>
       {% endfor %}      
       <div class="row-fluid center-content">
-        <a class="btn btn-large btn-info show-profile" href="#">선택</a>  
+        <a class="btn btn-large btn-info show-profile" href="javascript:;">선택</a>  
       </div>
     </div>
   </li>

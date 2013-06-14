@@ -171,9 +171,12 @@ class User(ndb.Model):
         q = Proposal.query().filter(Proposal.is_active == True) 
         q = q.filter(Proposal.to_user == self.key)
         from_user_keys = [p.from_user for p in q.fetch(projection=["from_user"])]
-        from_users = User.query().filter(User.key.IN(from_user_keys))
-
-        return from_users
+        
+        if from_user_keys:
+            from_users = User.query().filter(User.key.IN(from_user_keys))
+            return from_users
+        else:
+            return []
 
 
 class Proposal(ndb.Model):

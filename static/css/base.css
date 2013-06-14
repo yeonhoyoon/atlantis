@@ -79,19 +79,100 @@ input.appended-input {
   width:52%
 }
 
+.thumbnail {
+  background: white;
+}
+
+a.darklink {
+  color: #696969;
+  text-decoration: none;
+}
+
+a.darklink:hover {
+  color: #333333;
+}
+
+span.large {
+  display: inline;
+  font-size: 21px;
+  line-height: 44px;
+}
+
 /* base.html */
+
+/*navbar*/
+#top-navbar-inner {
+  background: #2c3e50;  
+}
+
+.navbar .nav>li>a {
+  color: white;
+  text-shadow: none;
+}
+
+.navbar .nav>.active>a,
+.navbar .nav>.active>a:hover, 
+.navbar .nav>.active>a:focus {
+  color: #e06342;
+  background-color:transparent;
+  box-shadow:none;
+  -moz-box-shadow:none;
+  -webkit-box-shadow:none;
+}
+
+.navbar .nav>li>a:hover {
+  color: #b73e1e;
+}
+
+.navbar .brand {
+  color: white;
+  text-shadow: none;
+}
+
+.navbar .btn-navbar .icon-bar {
+  background-color: white;
+}
+
+.navbar-inverse .btn-navbar {
+  background-color: black;
+  background-image: -moz-linear-gradient(top,#111E2B,#070F17);
+  background-image: -webkit-gradient(linear,0 0,0 100%,from(#111E2B),to(#070F17));
+  background-image: -webkit-linear-gradient(top,#111E2B,#070F17);
+  background-image: -o-linear-gradient(top,#111E2B,#070F17);
+  background-image: linear-gradient(to bottom,#111E2B,#070F17);
+  background-repeat: repeat-x;
+}
+
+@media (max-width: 979px) {
+  .navbar .nav-collapse .nav>li>a, 
+  .navbar .nav-collapse .dropdown-menu a {
+    color: white;
+    font-weight: normal;
+  }
+
+  .navbar .nav-collapse .nav>.active>a,
+  .navbar .nav-collapse .nav>.active>a:hover, 
+  .navbar .nav-collapse .nav>.active>a:focus {
+    color: #e06342;
+  }
+
+  .navbar .nav-collapse .nav>li>a:hover, 
+  .navbar .nav-collapse .nav>li>a:focus, 
+  .navbar .nav-collapse .dropdown-menu a:hover, 
+  .navbar .nav-collapse .dropdown-menu a:focus {
+    background-color: inherit;
+    color: #b73e1e;
+  }
+}
+
+/*navbar end*/
+
 a#feedback-link {
   position: fixed;
   bottom: 0;
   right: 20px;
   display: block;
   overflow: hidden;
-  text-decoration: none;
-  color: #696969;
-}
-
-a#feedback-link:hover {
-  color: #333333;
 }
 
 /* meet.html */
@@ -105,6 +186,10 @@ span.h3 {
   font-weight: bold;
   color: inherit;
   font-size: 24.5px;
+}
+
+.no-margin {
+  margin : 0px;
 }
 
 .no-margin-bottom {
@@ -149,12 +234,7 @@ hr.thick {
   border: none;
 }
 
-#remaining-choices {
-  height: 70px;
-  line-height: 70px;
-}
-
-#show-summary {
+.vertical-margin10 {
   margin-top: 10px;
   margin-bottom: 10px;
 }
@@ -172,6 +252,11 @@ div.center-content {
 
 .center300 {
   max-width: 300px;
+  margin: 0 auto;
+}
+
+.center450 {
+  max-width: 450px;
   margin: 0 auto;
 }
 
@@ -197,14 +282,24 @@ span.data {
   border-radius: 5px;
   margin-bottom: 10px;
   padding: 4px;
+  background-color: white;
+
 }
 
 #write-talk {
   border-radius: 5px;
   padding: 4px;
-  padding-bottom: 0px
+  padding-bottom: 0px;
 }
 
 #write-talk-controls {
   margin-bottom: 5px;
+}
+
+.talk-content-container {
+  margin: 4px;
+}
+
+#no-more-talks {
+  padding: 4px;
 }
