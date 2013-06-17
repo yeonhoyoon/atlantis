@@ -31,6 +31,13 @@
     <link rel="stylesheet" href="static/css/font-awesome.min.css">
     <link rel="stylesheet" href="static/css/bootstrap-responsive.min.css">
     <link rel="stylesheet" type="text/css" href="static/css/base.css">
+    {% block stylesheets %}
+      
+    {% endblock %}
+    <script src="static/js/respond.min.js"></script>
+    <!--[if lt IE 9]>
+      <script src="static/js/html5shiv.js"></script>
+    <![endif]-->
     {% if user %}
       <meta name="_xsrf_token" content="{{ xsrf_token }}">
     {% endif %}
@@ -129,11 +136,13 @@
       <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
       <script src="static/js/bootstrap.min.js"></script>
       <script src="static/js/bootstrapx-clickover.js"></script>
+      <script src="static/js/jquery.placeholder.min.js"></script>
+      <script src='static/js/jquery.autosize.min.js'></script>
+      <script src='static/js/moment.min.js'></script>
       <script src="static/js/base.js"></script>
       {% block scripts %}
         
       {% endblock %}   
-    </div>
   </div>    
   <div id="footer" class="container text-center">
   {% block footer %}

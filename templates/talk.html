@@ -6,6 +6,10 @@
     얘기해요
 {% endblock %}
 
+{% block stylesheets %}
+<link rel="stylesheet" type="text/css" href="static/css/talk.css">
+{% endblock %}
+
 {% block headscripts %}
 	<script src='https://cdn.firebase.com/v0/firebase.js'></script>
 {% endblock %}
@@ -18,7 +22,7 @@
 <div class="row">
 	<div id="write-talk" class="span6 offset3">
 		<div id="write-talk-controls" class="row-fluid">
-			<input id="write-talk-name" class="no-margin-bottom input-small" type="text"
+			<input id="write-talk-name" class="input-small" type="text"
 						 placeholder="{{ user.nickname or '' }}"
 						 value="{{ user.nickname or '' }}">
 			<button id="write-talk-post" 
@@ -26,14 +30,17 @@
 							<i class="icon-pencil"></i>
 			</button>	
 		</div>
-		<textarea id="write-talk-content" class="span6" rows="3" 
+		<textarea id="write-talk-content" 
+							class="span6 no-margin-bottom" rows="3" 
 							placeholder="무슨 생각 중이세요?"></textarea>							
 		<hr class="thick">
 	</div>
 </div>
 <div id="talks" class="row">
+	
+	<div id="talkEnd"></div>
 </div>
-<div id="spinner" class="text-center">
+<div id="spinner" class="text-center hide">
 	<i class="icon-spinner icon-spin icon-3x"></i>			
 </div>
 <div class="text-center">
@@ -50,18 +57,57 @@
 <div id="talk-template" class="talk span6 offset3 hide">
 	<div class="row-fluid">
 		<strong class="talk-name">name</strong>
-		<i class="icon-ok-circle text-success"></i>
+		<i class="icon-github-alt muted hide"></i>
 		<a class="talk-time pull-right no-deco muted" title="">time</a>
 	</div>
 	<div class="row-fluid talk-content-container">
 		<span class="talk-content data">content</span>
 	</div>
+	<div class="row-fluid bottom-margin5">
+		<small class="muted">
+			<a href="javascript:;" 
+				 class="add-comment darklink muted">
+				<i class="icon-comment"></i> 댓글 3개</a>
+		</small>
+		<!-- <span class="muted"><i class="icon-comments"></i></span> -->
+	</div>
+	<div class="row-fluid">
+	  <div class="comment">
+	      <strong class="comment-name">닉네임</strong>
+	      <span class="comment-content data">안녕하세요</span>
+	        <a class="comment-time no-deco muted pull-right" 
+	           title="">8분 전</a>
+	  </div>
+	  <div class="comment">
+	      <strong class="comment-name">기획자</strong>
+	      <i class="icon-github-alt muted"></i>
+	      <span class="comment-content data">하이</span>
+	        <a class="comment-time no-deco muted" 
+	           title=""></a>
+	  </div>
+	  <div class="comment">
+	      <strong class="comment-name">디자이너 정</strong>
+	      <span class="comment-content data">굿모</span>
+	        <a class="comment-time no-deco muted" 
+	           title=""></a>
+	  </div>
+	  <div class="row-fluid">
+	    <div class="write-comment">
+	    <input id="proposal-key-str" type="hidden" 
+	           value="fasdf">
+	    <div class="row-fluid">
+    		<textarea class="write-comment-content" rows="1"
+	                name="content"></textarea>
+    		<button class="btn write-comment-post"><i class="icon-reply"></i>
+    	</div>	      
+	    </div>
+	    </div>
+	  </div> 
+	</div>
 </div>
 {% endblock %}
 
 {% block scripts %}
-	<script src='static/js/jquery.autogrow-textarea.js'></script>
-	<script src='static/js/moment.min.js'></script>
 	<script src='static/js/talk.js'></script>
 {% endblock %}
     

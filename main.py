@@ -9,7 +9,8 @@ from webapp2_extras import sessions
 from model import User, Proposal, UserState
 from handlers import (MainPage, MeetPage, ShowSummary, ShowProfile,
                       ProposalsPage, 
-                      Propose, TalkPage, ProfilePage, AccountPage, 
+                      Propose, AddComment,
+                      TalkPage, ProfilePage, AccountPage, 
                       TestPage, LoginPage, LogoutPage, SignupPage, 
                       SendVerificationEmail, Verify)
 import keys
@@ -38,6 +39,7 @@ app = webapp2.WSGIApplication([('/', MainPage),
    webapp2.Route('/meet/show_profile', ShowProfile, name='ShowProfile'),
    webapp2.Route('/proposals', ProposalsPage, name='ProposalsPage'),
    webapp2.Route('/meet/propose', Propose, name='Propose'),
+   webapp2.Route('/meet/add_comment', AddComment, name='AddComment'),
    webapp2.Route('/talk', TalkPage, name='TalkPage'),
    webapp2.Route('/profile', ProfilePage, name='ProfilePage'),
    webapp2.Route('/account', AccountPage, name='AccountPage'),

@@ -10,6 +10,17 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
+- kind: Comment
+  ancestor: yes
+  properties:
+  - name: created
+
+- kind: Comment
+  ancestor: yes
+  properties:
+  - name: created
+    direction: desc
+
 - kind: Proposal
   properties:
   - name: from_user
@@ -28,3 +39,10 @@ indexes:
   - name: is_active
   - name: to_user
   - name: from_user
+
+- kind: Proposal
+  ancestor: yes
+  properties:
+  - name: is_active
+  - name: created
+    direction: desc

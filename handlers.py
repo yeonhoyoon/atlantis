@@ -7,9 +7,10 @@ import uuid
 import webapp2
 import jinja2
 from google.appengine.api import mail
+from google.appengine.ext import ndb
 from webapp2_extras import sessions, auth
 from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
-from model import User, Proposal, UserState, UserToken
+from model import User, Proposal, UserState, UserToken, Comment
 from util import util
 import keys
 from basehandlers import BaseHandler, LoginRequiredHandler
@@ -54,12 +55,12 @@ class MeetPage(LoginRequiredHandler):
                 self.write('profile has changed')
 
         elif state == UserState.PROPOSED:
-            other_user_key_id = self.session.get('propose_to_user_key') or \
-                             self.user.get_proposed_to_user_key()
+            proposal = self.user.get_proposal()
 
-            if other_user_key_id:
-                self.render('show_profile.html', other_user=User.get_by_id(other_user_key_id), 
-                                                 proposed=True)
+            if proposal:
+                self.render('show_profile.html', other_user=proposal.to_user.get(),
+                                                 comments=proposal.get_comments(),
+                                                 proposal_key_str=proposal.key.urlsafe())
             else:
                 self.write('no proposal exists')
 
@@ -69,7 +70,7 @@ class MeetPage(LoginRequiredHandler):
 
 class ProposalsPage(LoginRequiredHandler):
     def get(self):
-        proposed_users = self.user.get_proposed_users()
+        proposed_users = self.user.get_users_proposed_to_me()
         for user in proposed_users:
             user.profile_lines = user.get_random_profile_lines()
 
@@ -108,14 +109,29 @@ class Propose(LoginRequiredHandler):
             selected_users = list(User.by_profile_uuids(self.user.selected_profile_uuids))
             other_user = selected_users[0]
 
-            proposal = Proposal(from_user=self.user.key, to_user=other_user.key)
+            proposal = Proposal(parent=self.user.key, to_user=other_user.key)
             proposal.put()
 
             self.user.set_state(UserState.PROPOSED)
             self.user.put()
+        else:
+            self.abort(400)
 
-            self.session['propose_to_user_key'] = other_user.key.id()
 
+class AddComment(LoginRequiredHandler):
+    def post(self):
+        if self.user.state == UserState.PROPOSED:
+            proposal_key_str = self.request.get('proposal_key_str')
+            proposal_key = ndb.Key(urlsafe=proposal_key_str)
+            content = self.request.get('content')
+            Comment.create_comment(proposal_key, self.user.username, content)
+
+            comments = proposal_key.get().get_comments()
+            comments_rendered = ''
+            for comment in comments:
+                comments_rendered += self.render_str('comment.html', comment=comment)
+
+            self.write(comments_rendered)
         else:
             self.abort(400)
 

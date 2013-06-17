@@ -6,27 +6,29 @@
 
 {% block content %}
 <form id="signup-form" class="form-horizontal" method="post" action="/signup">
-  <legend>가입하기</legend>
-  {% for error_key in errors %}
-    <div class="alert">
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
-        {{ errors[error_key] }}
+  <fieldset>
+    <legend>가입하기</legend>
+    {% for error_key in errors %}
+      <div class="alert">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+          {{ errors[error_key] }}
+      </div>
+    {% endfor %}
+    <div class="control-group">
+      <div class="input-append">
+        <input class="appended-input" type="text" name="username" placeholder="이메일">
+        <span class="add-on">@snu.ac.kr</span>
+      </div>
     </div>
-  {% endfor %}
-  <div class="control-group">
-    <div class="input-append">
-      <input class="appended-input" type="text" name="username" placeholder="이메일">
-      <span class="add-on">@snu.ac.kr</span>
+    <div class="control-group">
+        <input type="password" name="password" placeholder="비밀번호">
     </div>
-  </div>
-  <div class="control-group">
-      <input type="password" name="password" placeholder="비밀번호">
-  </div>
-  <div class="control-group">
-      <input type="password" name="verify" placeholder="비밀번호 확인">
-  </div>
-  <div class="control-group">
-    <button type="submit" class="btn btn-success">가입하기</button>
-  </div>
+    <div class="control-group">
+        <input type="password" name="verify" placeholder="비밀번호 확인">
+    </div>
+    <div class="control-group">
+      <button type="submit" class="btn btn-success">가입하기</button>
+    </div>
+  </fieldset>
 </form>
 {% endblock %}

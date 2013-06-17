@@ -1,5 +1,6 @@
 import re
 import hmac
+from datetime import datetime, timedelta
 from library.pybcrypt import bcrypt
 import keys
 import webapp2
@@ -48,3 +49,7 @@ def shorten_if_long(sentence):
         return sentence[:45].strip() + '...'
     else:
         return sentence
+
+def get_display_time(utctime):
+    utctime = utctime - timedelta(microseconds=utctime.microsecond)
+    return utctime + timedelta(hours=9)

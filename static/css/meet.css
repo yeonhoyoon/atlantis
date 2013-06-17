@@ -1,0 +1,39 @@
+#selected-users .thumbnail {
+  border-color: #3a87ad;
+}
+
+#show-profile-body .thumbnail {
+  border-color: #3a87ad;
+}
+
+#user-pool .thumbnail {
+  border-color: #cccccc;
+}
+
+#show-profile-body .label-first, #selected-users .label-first {
+  background-color: #3a87ad;
+}
+
+#show-profile-body .label-second, #selected-users .label-second {
+  background-color: #c67605;
+}
+
+#show-profile-body .label-third, #selected-users .label-third {
+  background-color: #356635;
+}
+
+.unknown-card i {
+  font-size:3.4em
+}
+
+/*comments*/
+.comment {
+  margin-bottom: 5px;
+  padding: 2px 2px 2px 4px;
+  background-color: white;
+}
+
+#write-comment-post {
+  margin-left:0;
+  float:right;
+}

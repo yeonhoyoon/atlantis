@@ -12,20 +12,22 @@
 </div>
 {% endif %}
 <form class="form-horizontal" method="post" action="/login">
-  <legend>로그인</legend>
-  <div class="control-group">
-    <div class="input-append">
-      <input class="appended-input" type="text" name="username" placeholder="이메일">
-      <span class="add-on">@snu.ac.kr</span>
+  <fieldset>
+    <legend>로그인</legend>
+    <div class="control-group">
+      <div class="input-append">
+        <input class="appended-input" type="text" name="username" placeholder="이메일">
+        <span class="add-on">@snu.ac.kr</span>
+      </div>
     </div>
-  </div>
-  <div class="control-group">
-      <input type="password" name="password" placeholder="비밀번호">
-  </div>
-  <input type="hidden" name="returnurl" value="{{ returnurl }}">
-  <div class="control-group">
-      <button type="submit" class="btn btn-info">로그인</button>
-  </div>
+    <div class="control-group">
+        <input type="password" name="password" placeholder="비밀번호">
+    </div>
+    <input type="hidden" name="returnurl" value="{{ returnurl }}">
+    <div class="control-group">
+        <button type="submit" class="btn btn-info">로그인</button>
+    </div>
+  </fieldset>
 </form>
 <hr>
 <div class="control-group">

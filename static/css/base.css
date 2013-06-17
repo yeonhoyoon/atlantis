@@ -10,6 +10,97 @@ html, body {
   height: 100%;
 }
 
+body, input, button, select, textarea, .navbar-search .search-query {
+  font-family: "NanumGothic", sans-serif;
+}
+
+/*prevents garbled korean*/
+h1, h2, h3, h4, h5, h6 {
+	text-rendering: auto;
+}
+
+strong {
+  font-family: "NanumGothicBold", sans-serif;
+}
+
+.spacer50 { 
+  height: 50px; 
+  width: 100%; 
+  font-size: 0; 
+  margin: 0; 
+  padding: 0; 
+  border: 0; 
+  display: block; 
+}
+
+input.appended-input {
+  width:57%
+}
+
+.thumbnail {
+  background: white;
+}
+
+a.darklink {
+  color: #696969;
+  text-decoration: none;
+}
+
+a.darklink:hover {
+  color: #333333;
+}
+
+span.large {
+  display: inline;
+  font-size: 21px;
+  line-height: 44px;
+}
+
+a.no-deco {
+  text-decoration: none;
+}
+
+.no-margin {
+  margin : 0px;
+}
+
+.no-margin-bottom {
+  margin-bottom: 0px;
+}
+
+.bottom-margin5 {
+  margin-bottom: 5px;
+}
+
+.bottom-margin10 {
+  margin-bottom: 10px;
+}
+
+hr.thick {
+  height: 3px;  
+  background-color: #cccccc;
+  border: none;
+}
+
+div.center-content {
+  text-align: center; 
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+
+span.data {
+  white-space: pre;
+  word-wrap: break-word;
+}
+
+.alert a.pull-right {
+  padding: 0px; 
+  line-height:20px; 
+  margin-right:-25px; 
+}
+
+/* base.html */
+
 #wrapper {
   min-height: 100%;
 }
@@ -33,76 +124,10 @@ html, body {
   color: #999999;
 }
 
-body {
-  font-family: "NanumGothic", sans-serif;
-}
-
-/*prevents garbled korean*/
-h1, h2, h3, h4, h5, h6 {
-	text-rendering: auto;
-}
-
-strong {
-  font-family: "NanumGothicBold", sans-serif;
-}
-
-.form-small .control-label {
-    width: 100px;
-}
-
-.form-small .controls {
-    margin-left: 120px;
-}
-
-.form-medium .control-label {
-    width: 180px;
-}
-
-.form-medium .controls {
-    margin-left: 200px;
-}
-
-.form-xlarge .control-label {
-    width: 240px;
-}
-
-.form-xlarge .controls {
-    margin-left: 260px;
-}
-
-.navbar-form .input-append,
-.navbar-form .input-prepend {
-  margin-bottom: 0px;
-}
-
-input.appended-input {
-  width:52%
-}
-
-.thumbnail {
-  background: white;
-}
-
-a.darklink {
-  color: #696969;
-  text-decoration: none;
-}
-
-a.darklink:hover {
-  color: #333333;
-}
-
-span.large {
-  display: inline;
-  font-size: 21px;
-  line-height: 44px;
-}
-
-/* base.html */
-
 /*navbar*/
 #top-navbar-inner {
   background: #2c3e50;  
+  filter: none;
 }
 
 .navbar .nav>li>a {
@@ -173,117 +198,4 @@ a#feedback-link {
   right: 20px;
   display: block;
   overflow: hidden;
-}
-
-/* meet.html */
-
-a.no-deco:hover {
-	text-decoration: none;
-}
-
-span.h3 {
-  font-family: inherit;
-  font-weight: bold;
-  color: inherit;
-  font-size: 24.5px;
-}
-
-.no-margin {
-  margin : 0px;
-}
-
-.no-margin-bottom {
-  margin-bottom: 0px;
-}
-
-input.no-margin-bottom {
-  margin-bottom: 0px;
-}
-
-#selected-users .thumbnail {
-  border-color: #3a87ad;
-}
-
-#show-profile-body .thumbnail {
-  border-color: #3a87ad;
-}
-
-#user-pool .thumbnail {
-  border-color: #cccccc;
-}
-
-#show-profile-body .label-first, #selected-users .label-first {
-  background-color: #3a87ad;
-}
-
-#show-profile-body .label-second, #selected-users .label-second {
-  background-color: #c67605;
-}
-
-#show-profile-body .label-third, #selected-users .label-third {
-  background-color: #356635;
-}
-
-.unknown-card i {
-  font-size:3.4em
-}
-
-hr.thick {
-  height: 3px;  
-  background-color: #cccccc;
-  border: none;
-}
-
-.bottom-margin10 {
-  margin-bottom: 10px;
-}
-
-div.center-content {
-  text-align: center; 
-  margin-top: 15px;
-  margin-bottom: 5px;
-}
-
-.center600 {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-span.data {
-  white-space: pre;
-  word-wrap: break-word;
-}
-
-.alert a.pull-right {
-  padding: 0px; 
-  line-height:20px; 
-  margin-right:-25px; 
-}
-
-/*talk*/
-.talk {
-  border: 1px solid gray;
-  border-radius: 5px;
-  margin-bottom: 10px;
-  padding: 4px;
-  background-color: white;
-
-}
-
-#write-talk {
-  border-radius: 5px;
-  padding: 4px;
-  padding-bottom: 0px;
-}
-
-#write-talk-controls {
-  margin-bottom: 5px;
-}
-
-.talk-content-container {
-  margin: 4px;
-}
-
-#no-more-talks {
-  padding: 4px;
 }

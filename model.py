@@ -136,8 +136,7 @@ class User(ndb.Model):
     @classmethod
     def get_recent_users(cls):
         q = cls.query().filter(cls.last_active > datetime.utcnow() - timedelta(days=3))
-        recent_users = q.iter()
-        return recent_users
+        return q.fetch()
 
     def get_random_profile_lines(self):
         profile_lines = util.tokenize_sentences(self.profile)    
@@ -161,31 +160,42 @@ class User(ndb.Model):
         if selected_users:
             return selected_users[0]
 
-    def get_proposed_to_user_key_id(self):
-        q = Proposal.query().filter(Proposal.is_active == True)
-        q = q.filter(Proposal.from_user == self.key).order(-Proposal.created)
+    def get_proposal(self):
+        q = Proposal.query(ancestor=self.key)
+        q = q.filter(Proposal.is_active == True).order(-Proposal.created)
         proposal = q.fetch(1)
 
         if proposal:
-            return proposal[0].to_user.id()
+            return proposal[0]
         else:
             return None
 
-    def get_proposed_users(self):
-        q = Proposal.query().filter(Proposal.is_active == True) 
-        q = q.filter(Proposal.to_user == self.key)
-        from_user_keys = [p.from_user for p in q.fetch(projection=["from_user"])]
-        
-        if from_user_keys:
-            from_users = User.query().filter(User.key.IN(from_user_keys))
-            return from_users
-        else:
-            return []
+    def get_users_proposed_to_me(self):
+        q = Proposal.query().filter(Proposal.to_user == self.key) 
+        q = q.filter(Proposal.is_active == True)
+        from_users = [p.key.parent().get() for p in q.fetch()]
+        return from_users
 
 
+#parent: from_user
 class Proposal(ndb.Model):
-    from_user = ndb.KeyProperty(kind=User, required=True)
     to_user = ndb.KeyProperty(kind=User, required=True)
     created = ndb.DateTimeProperty(required=True, auto_now_add=True)
     is_active = ndb.BooleanProperty(default=True)
     is_accepted = ndb.BooleanProperty(default=False)
+
+    def get_comments(self):
+        q = Comment.query(ancestor=self.key).order(Comment.created)
+        return q.fetch()
+
+#parent: proposal
+class Comment(ndb.Model):
+    username = ndb.StringProperty(required=True)
+    content = ndb.TextProperty()
+    created = ndb.DateTimeProperty(required=True, auto_now_add=True)
+
+    @classmethod
+    def create_comment(cls, proposal_key, username, content):
+        comment = Comment(parent=proposal_key, username=username, content=content)
+        comment.put()
+        return comment

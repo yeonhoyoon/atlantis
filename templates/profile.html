@@ -7,9 +7,14 @@
 {% endblock %}
 
 {% block content %}
+<!--[if lte IE 8]>
+<style>
+.row-fluid [class*="span"] { min-height: 20px; }
+</style>
+<![endif]-->
 <div class="row">
   <form class="span6 offset3" method="post">
-    <input name=_xsrf_token type=hidden value="{{ xsrf_token }}">
+    <input name="_xsrf_token" type="hidden" value="{{ xsrf_token }}">
     <h3>내 프로필</h3>
     <hr class="thick">
     <h5>닉네임</h5>

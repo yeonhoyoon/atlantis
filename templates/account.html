@@ -7,16 +7,15 @@
 {% endblock %}
 
 {% block content %}
-  <form class="form-horizontal form-small" method="post">
-    <input name=_xsrf_token type=hidden value="{{ xsrf_token }}">
+<form class="form-horizontal" method="post">
+  <fieldset>
+    <input name="_xsrf_token" type="hidden" value="{{ xsrf_token }}">
     <legend>기본정보</legend>
     <div class="control-group">
       <label class="control-label" for="input_username">이메일</label>
-      <div class="row-fluid controls">
-        <div class="span3">
+      <div class="controls">
           <span class="uneditable-input" 
                 id="input_username">{{ user.username }}@snu.ac.kr</span> 
-        </div>
       </div>
     </div>
     <div class="control-group">
@@ -39,9 +38,12 @@
                 name="change_account" value="change_account">저장하기</button>
       </div>
     </div>
-  </form>
-  <form class="form-horizontal form-small" method="post">
-    <input name=_xsrf_token type=hidden value="{{ xsrf_token }}">
+  </fieldset>
+</form>
+<div class="spacer50"></div>
+<form class="form-horizontal" method="post">
+  <fieldset>
+    <input name="_xsrf_token" type="hidden" value="{{ xsrf_token }}">
     <legend>비밀번호 변경</legend>
     {% for error_key in password_errors %}
       <div class="alert">
@@ -59,7 +61,8 @@
     <div class="control-group">
       <label class="control-label" for="input_new_password">새 비밀번호</label>
       <div class="controls">
-        <input class="input-large" type="password" id="input_new_password" name="new_password">
+        <input class="input-large" type="password" 
+               id="input_new_password" name="new_password">
       </div>
     </div>
     <div class="control-group">
@@ -75,5 +78,6 @@
                 name="change_password" value="change_password">저장하기</button>
       </div>
     </div>
-  </form>
+  </fieldset>
+</form>
 {% endblock %}

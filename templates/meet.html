@@ -8,6 +8,10 @@
 ] %}
 {% set active_tab= active_tab | default('/meet') %}
 
+{% block stylesheets %}
+<link rel="stylesheet" type="text/css" href="static/css/meet.css">
+{% endblock %}
+
 {% block content %}
 	<div class="row-fluid">
 	<div class="span2">

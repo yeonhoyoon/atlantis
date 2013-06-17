@@ -13,16 +13,14 @@ $(".user-card a.select").click(function() {
 
 		$("#selected-users .unknown-card:visible:last").hide();
 		var selectedCard = currentCard.clone(true)
-																	.insertBefore(".unknown-card:first").hide();
-		
-		selectedCard.show(0);
+																	.insertBefore(".unknown-card:first");
 	} 
 	else {
 		var selectedCard = getSelectedCard(profile_uuid);
-		selectedCard.hide(0, function () {
-			selectedCard.remove();
-			$("#selected-users .unknown-card:hidden:last").show();
-		});
+		selectedCard.hide(); 
+		selectedCard.remove();
+		$("#selected-users .unknown-card:hidden:last").show();
+		
 		var matchingUserCard = getUserCardFromUserCardpool(profile_uuid);
 		styleUnselect(matchingUserCard);
 
@@ -63,9 +61,9 @@ var profile_uuid = $(this).parents(".user-card").find(".profile-uuid").attr("val
 });
 
 $("#propose").click(function (event) {
-event.preventDefault();
+	event.preventDefault();
 
-var profile_uuid = $("#show-profile-body").find(".profile-uuid").attr("value");
+	var profile_uuid = $("#show-profile-body").find(".profile-uuid").attr("value");
 
 	$.post('/meet/propose', 
 		{ profile_uuid: profile_uuid }, 
@@ -96,4 +94,42 @@ function styleSelect(card) {
 function styleUnselect(card) {
 	var icon = card.find("i"); 
 	icon.removeClass("icon-star").addClass("icon-star-empty");
+}
+
+//Comments
+$("#write-comment-content").keydown(handleEnter).autosize();
+$("#write-comment-post").click(postComment);
+
+updateCommentsTime();
+
+function handleEnter(event) {
+    if (event.keyCode == 13 && !event.shiftKey && !event.ctrlKey) {
+    	postComment();
+    	return false;
+    }
+}
+
+function postComment(textareaElement) {
+	var commentArea = $("#write-comment-content");
+	var proposal_key_str = $('#proposal-key-str').val();
+	var content = commentArea.val();
+
+	$.post('/meet/add_comment', 
+		{ proposal_key_str: proposal_key_str,
+			content: content }, 
+		function(data) {
+			$("#comments").html(data);
+			commentArea.val('');
+			commentArea.trigger('autosize');
+			updateCommentsTime();
+		});
+}
+
+function updateCommentsTime() {
+	$("#comments .comment-time").each(function () {
+  var time = moment($(this).attr('title'));
+  if (time !== undefined) {
+    $(this).text(base.getDisplayTime(time));  
+  }    
+	});
 }

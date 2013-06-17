@@ -18,6 +18,7 @@ jinja_env = jinja2.Environment(autoescape=True,
                                loader=jinja2.FileSystemLoader(
                                os.path.join(os.path.dirname(__file__), 'templates')))
 
+jinja_env.filters['datetime'] = util.get_display_time
 
 class BaseHandler(webapp2.RequestHandler):
     def write(self, *a, **kw):

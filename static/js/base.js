@@ -6,7 +6,7 @@ $.ajaxSetup({
     crossDomain: false,
     beforeSend: function(xhr, settings) {
         if (!xsrfSafeMethod(settings.type)) {
-        	var token = $('meta[name=_xsrf_token]').attr('content');
+        	var token = $('meta[name="_xsrf_token"]').attr('content');
           xhr.setRequestHeader("X-XSRF-Token", token);
         }
     }
@@ -56,3 +56,21 @@ function showClassicWidget() {
 $("#feedback-link").click(function() {
 	showClassicWidget();
 });
+
+//polyfills
+$('input, textarea').placeholder();
+
+//base
+var base = new function() {
+
+    // var internalFunction = function() {
+    // };
+
+		this.getDisplayTime = function(time) {
+		  if(moment(time).isBefore(moment().subtract('days', 1))) {
+		    return moment(time).calendar();
+		  } else {
+		    return moment(time).fromNow();
+		  }
+		}
+};

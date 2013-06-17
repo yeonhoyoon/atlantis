@@ -5,8 +5,8 @@
 {% endblock %}
 
 {% block meet_content %}
-<div class="row">
-  <div id="show-profile-body" class="span8 offset2">
+<div id="show-profile-body" class="row-fluid">
+  <div class="span8 offset2">
     <div class="thumbnail">
       <div class="row-fluid">
           <strong>{{ other_user.nickname }}</strong>
@@ -33,7 +33,7 @@
         <span class="data">{{ other_user.profile }}</span>
       </div>
       <div class="row-fluid center-content">
-        {% if not proposed %}
+        {% if not proposal_key_str %}
           <a id="propose" class="btn btn-large btn-info" 
            href="javascript:;">최종선택<i class="icon-star"></i></a>
         {% endif %}      
@@ -41,18 +41,33 @@
     </div>
   </div>
 </div>
-<div id="comments" class="row">
-  <div class="talk span8 offset2">
-    <div class="row-fluid">
-      <strong class="talk-name">name</strong>
-      <i class="icon-ok-circle text-success"></i>
-      <a class="talk-time pull-right no-deco muted" title="">time</a>
-    </div>
-    <div class="row-fluid talk-content-container">
-      <span class="talk-content data">content</span>
-    </div>
+{% if proposal_key_str %}
+<div class="row-fluid">
+  <div class="span8 offset2">
+    <hr class="thick">    
   </div>
 </div>
+<div id="comments">
+  {% for comment in comments %}
+    {% include "comment.html" %}
+  {% endfor %}
+</div>
+<div class="row-fluid">
+  <div id="write-comment" class="span8 offset2">
+  <input id="proposal-key-str" type="hidden" 
+         value="{{ proposal_key_str }}">
+  <div class="row-fluid">
+    <textarea id="write-comment-content" 
+              class="span10" rows="1"
+              name="content" 
+              placeholder="{{ other_user.nickname }}님께 인사를 남겨 보세요."></textarea>
+    <button id="write-comment-post" 
+            class="btn span2"><i class="icon-reply"></i>
+          </button>
+  </div>
+  </div>
+</div> 
+{% endif %}
 {% endblock %}
 {% block scripts %}
   <script src="static/js/meet.js"></script> 
