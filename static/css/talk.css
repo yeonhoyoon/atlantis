@@ -59,11 +59,3 @@
   margin-left: 5px;
   width:97%;
 }
-
-#online-user-count-div {
-  position: fixed;
-  bottom: 0;
-  left: 20px;
-  display: block;
-  overflow: hidden;
-}
