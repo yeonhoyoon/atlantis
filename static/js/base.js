@@ -1,3 +1,5 @@
+(function (base, $, moment, undefined){
+
 function xsrfSafeMethod(method) {
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
@@ -60,17 +62,13 @@ $("#feedback-link").click(function() {
 //polyfills
 $('input, textarea').placeholder();
 
-//base
-var base = new function() {
 
-    // var internalFunction = function() {
-    // };
-
-		this.getDisplayTime = function(time) {
-		  if(moment(time).isBefore(moment().subtract('days', 1))) {
-		    return moment(time).calendar();
-		  } else {
-		    return moment(time).fromNow();
-		  }
-		}
-};
+base.getDisplayTime = function(time) {
+  if(moment(time).isBefore(moment().subtract('days', 1))) {
+    return moment(time).calendar();
+  } else {
+    return moment(time).fromNow();
+  }
+}
+	
+}(window.base = window.base || {}, jQuery, moment));

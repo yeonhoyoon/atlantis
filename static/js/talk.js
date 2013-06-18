@@ -1,3 +1,4 @@
+(function(talklogic, $, moment, base, undefined) {
 moment.lang('ko');
 $('#write-talk textarea').autosize();
 
@@ -7,10 +8,15 @@ dataRef.auth($("#firebase_token").val());
 loadMoreTalks(loadNewTalks);
 $("#load-more-talks").click(loadMoreTalks);
 
+var user = getCurrentUser();
+$("#write-talk-name").change(function () {
+  user = getCurrentUser();
+});
+
 function loadMoreTalks(callback) {
   changeLoadingState(true);
 
-  var currentTime = new Date().valueOf();
+  var currentTime = moment().valueOf();
 
   if ((lastTalk = $('#talks .talk:last')).length) {
     var lastDisplayTime = lastTalk.find(' .talk-time').attr('title');
@@ -24,9 +30,7 @@ function loadMoreTalks(callback) {
     
     //older items are loaded first.
     snapshot.forEach(function (child) {
-      var data = child.val();
-
-      displayTalk(data, function(talk) {
+      displayTalk(child, function(talk) {
         talk.insertBefore(insertPosition); 
         insertPosition = talk;
       });
@@ -48,20 +52,19 @@ function loadMoreTalks(callback) {
 function loadNewTalks(currentTime) {
   var newDataQuery = dataRef.child('talks').startAt(currentTime);
   newDataQuery.on('child_added', function (child) {
-    var data = child.val();
-
-    displayTalk(data, function(talk) {
+    displayTalk(child, function(talk) {
       $('#talks').prepend(talk);
     });
   });
 }
 
-function displayTalk(talkData, position) {
+function displayTalk(talk, position) {
+  var talkData = talk.val();
   var template = $('#talk-template').clone();
   template.removeAttr("id");
   if(talkData.alias) {
     template.find('.talk-name').text(talkData.alias);
-    template.find('.icon-github-alt').show();
+    template.find('.talk-alias').show();
   } else {
     template.find('.talk-name').text(talkData.nickname);    
   }
@@ -71,36 +74,138 @@ function displayTalk(talkData, position) {
            .attr('title', moment(talkData.time).format('YYYY-MM-DD HH:mm:ss'))
            .text(base.getDisplayTime(talkData.time));
 
-  template.find('.add-comment').click(function(e) {
-    //talkData.ref().child('/comments').set({})
-  })
-
+  prepareComments(talk, template);
   position(template);
   template.fadeIn();
 };
 
 $('#write-talk-post').click(function (e) {
-  var user = getCurrentUser();
   var content = $.trim($('#write-talk-content').val());
 
   if (user == undefined || content == '')
     return;  
 
-  var currentTime = new Date().getTime();
+  var currentTime = moment().valueOf();
 
-  var userTalkRef = dataRef.child('users').child(user.username)
+  var userTalkRef = dataRef.child('users/' + user.username + '/talks')
                            .push({time:currentTime});
 
-  dataRef.child('talks').child(userTalkRef.name())
-                        .set({alias: user.alias,
-                              nickname: user.nickname, 
-                              content: content,
-                              time: currentTime,
-                              '.priority': currentTime});
-
+  dataRef.child('talks/' + userTalkRef.name()).set({
+    alias: user.alias,
+    nickname: user.nickname,
+    content: content,
+    time: currentTime,
+    '.priority': currentTime
+  });
 
   $('#write-talk-content').val('').trigger('autosize');
 });
+
+function prepareComments(talk, template) {
+  var commentsSection = template.find('.comments');
+  template.find('.show-comment').click(function(e) {
+    commentsSection.toggle();
+  });
+
+  var writeCommentArea = $(commentsSection).find(".write-comment-area");
+  var position = function(comment) {
+    comment.insertBefore(writeCommentArea);
+  }
+
+  var currentTime = moment().valueOf();
+  loadOldComments(talk.name(), position, function() {
+    loadNewComments(talk.name(), position, currentTime);
+  });
+
+  //add post comment event handlers(enter, click)
+  var contentEl = template.find('.write-comment-content').autosize();
+  contentEl.keydown(function(event) {
+    if(isEnter(event)) {
+      postComment(contentEl, talk);
+
+      event.preventDefault();
+    }
+  });
+  
+  template.find('.write-comment-post').click(function(event) {
+    postComment(contentEl, talk)
+  });
+}
+
+function loadOldComments(talkName, position, callback) {
+  var oldCommentsQuery = dataRef.child('comments/' + talkName);
+  oldCommentsQuery.once('value', function(snapshot) {
+    snapshot.forEach(function(child) {
+      displayComment(child.val(), position);
+    });
+
+    if (typeof(callback) == typeof(Function)) {
+      callback();
+    } 
+  });
+}
+
+function loadNewComments(talkName, position, currentTime){
+  var newCommentsQuery = dataRef.child('comments/' + talkName).startAt(currentTime);
+  newCommentsQuery.on('child_added', function(child) {
+      displayComment(child.val(), position); 
+  }); 
+}
+
+function displayComment(commentData, position) {
+  var template = $('#comment-template').clone();
+  template.removeAttr("id");
+  if(commentData.alias) {
+    template.find('.comment-name').text(commentData.alias);
+    template.find('.comment-alias').show();
+  } else {
+    template.find('.comment-name').text(commentData.nickname);    
+  }
+
+  template.find('.comment-content').text(commentData.content);
+  template.find('.comment-time')
+           .attr('title', moment(commentData.time).format('YYYY-MM-DD HH:mm:ss'))
+           .text(base.getDisplayTime(commentData.time));
+
+  position(template);
+  refreshCommentsCount(template);
+  template.fadeIn('fast');
+}
+
+function refreshCommentsCount(comment) {
+  var parentTalk = comment.closest('.talk');
+
+  if (commentsCount = parentTalk.find('.comment').length) {
+    var showCommentsText = parentTalk.find('.show-comment-text');
+    showCommentsText.text('댓글 ' + commentsCount + '개');
+  }
+}
+
+function postComment(textArea, talk){
+  var content = $.trim($(textArea).val());
+
+  if(user == undefined || content == '')
+    return;
+
+  var currentTime = moment().valueOf();
+
+  var userCommentRef = dataRef.child('users/' + user.username + '/comments')
+                              .push({time:currentTime});
+
+  dataRef.child('comments/' + talk.name() + '/' + userCommentRef.name()).set({
+    alias: user.alias,
+    nickname: user.nickname,
+    content: content,
+    time: currentTime,
+    '.priority': currentTime
+  });
+
+  $(textArea).val('').trigger('autosize');
+}
+
+function isEnter(event) {
+  return event.keyCode == 13 && !event.shiftKey && !event.ctrlKey;
+}
 
 function getCurrentUser() {
   var nickname = $('#nickname').val();
@@ -142,3 +247,5 @@ setInterval(function() {
     }    
   });
 }, 60 * 1000)
+
+}(window.talklogic = window.talklogic || {}, jQuery, moment, base));

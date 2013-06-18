@@ -1,3 +1,5 @@
+(function meetlogic(meetlogic, $, moment, undefined){
+
 $(".user-card a.select").click(function() {
 	var currentCard = $(this).parents(".user-card");
 	var profile_uuid = currentCard.find(".profile-uuid").attr("value");
@@ -133,3 +135,6 @@ function updateCommentsTime() {
   }    
 	});
 }
+
+
+}(window.meetlogic = window.meetlogic || {}, jQuery, moment));
